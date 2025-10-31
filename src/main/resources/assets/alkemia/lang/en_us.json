@@ -1,0 +1,13 @@
+{
+  "itemGroup.alkemia": "Example Mod Tab",
+  "block.alkemia.example_block": "Example Block",
+  "item.alkemia.example_item": "Example Item",
+
+  "alkemia.configuration.title": "Alkemia Configs",
+  "alkemia.configuration.section.alkemia.common.toml": "Alkemia Configs",
+  "alkemia.configuration.section.alkemia.common.toml.title": "Alkemia Configs",
+  "alkemia.configuration.items": "Item List",
+  "alkemia.configuration.logDirtBlock": "Log Dirt Block",
+  "alkemia.configuration.magicNumberIntroduction": "Magic Number Text",
+  "alkemia.configuration.magicNumber": "Magic Number"
+}
