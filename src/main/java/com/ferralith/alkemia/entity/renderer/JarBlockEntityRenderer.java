@@ -38,6 +38,7 @@ public class JarBlockEntityRenderer implements BlockEntityRenderer<JarBlockEntit
 
         Level level = jarBlockEntity.getLevel();
         if (level == null) {
+            System.out.println(fluidStack + " " + fluidStack.getFluidType());
             return;
         }
         BlockPos pos = jarBlockEntity.getBlockPos();
@@ -46,6 +47,7 @@ public class JarBlockEntityRenderer implements BlockEntityRenderer<JarBlockEntit
         ResourceLocation stillTexture = fluidTypeExtensions.getStillTexture();
 
         if (stillTexture == null) {
+            System.out.println(fluidStack + " " + fluidStack.getFluidType() + " " + stillTexture.toString());
             return;
         }
 

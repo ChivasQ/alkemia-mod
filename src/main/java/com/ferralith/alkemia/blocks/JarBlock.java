@@ -1,13 +1,16 @@
 package com.ferralith.alkemia.blocks;
 
 import com.ferralith.alkemia.entity.JarBlockEntity;
+import com.ferralith.alkemia.registries.ModDataComponents;
 import com.ferralith.alkemia.registries.ModItems;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -16,7 +19,9 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -36,10 +41,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.IFluidTank;
+import net.neoforged.neoforge.fluids.*;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
@@ -209,5 +211,46 @@ public class JarBlock extends BaseEntityBlock {
                 blockTank.fill(fluidToTransfer, IFluidHandler.FluidAction.EXECUTE);
             }
         }
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+
+        IFluidHandlerItem fluidHandler = stack.getCapability(Capabilities.FluidHandler.ITEM);
+
+        if (fluidHandler == null) {
+            return;
+        }
+
+        FluidStack fluidStack = fluidHandler.getFluidInTank(0);
+
+        if (fluidStack.isEmpty()) {
+            tooltipComponents.add(
+                    Component.translatable("tooltip.alkemia.empty")
+                            .withStyle(ChatFormatting.GRAY)
+            );
+        } else {
+
+            //TODO: color depending on liquid
+            MutableComponent fluidName = Component.translatable(fluidStack.getFluid().getFluidType().getDescriptionId())
+                    .withStyle(ChatFormatting.AQUA); //for now
+
+            MutableComponent amountText = Component.literal(
+                            fluidStack.getAmount() + " / " + fluidHandler.getTankCapacity(0) + " mB"
+                    )
+                    .withStyle(ChatFormatting.GRAY);
+
+            tooltipComponents.add(
+                    fluidName.append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                            .append(amountText)
+            );
+        }
+
+         if (tooltipFlag.hasShiftDown()) {
+            tooltipComponents.add(Component.translatable("tooltip.alkemia.jar.details_line_1").withStyle(ChatFormatting.DARK_GRAY));
+         } else {
+            tooltipComponents.add(Component.translatable("tooltip.alkemia.shift_for_info").withStyle(ChatFormatting.DARK_GRAY));
+         }
     }
 }

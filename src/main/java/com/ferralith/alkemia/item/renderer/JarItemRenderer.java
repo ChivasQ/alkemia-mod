@@ -38,17 +38,6 @@ public class JarItemRenderer extends BlockEntityWithoutLevelRenderer {
         BakedModel blockModel = Minecraft.getInstance().getModelManager()
                 .getBlockModelShaper().getBlockModel(defaultState);
 
-        Minecraft.getInstance().getBlockRenderer().getModelRenderer()
-                .renderModel(
-                        poseStack.last(),
-                        buffer.getBuffer(RenderType.translucent()),
-                        defaultState,
-                        blockModel,
-                        1.0f, 1.0f, 1.0f,
-                        packedLight,
-                        packedOverlay
-                );
-
         // TODO: render fluid overlay
 
         IFluidHandlerItem fluidHandler = stack.getCapability(Capabilities.FluidHandler.ITEM);
@@ -59,6 +48,7 @@ public class JarItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
 
         if (fluidStack.isEmpty()) {
+            renderJar(poseStack, buffer, packedLight, packedOverlay, defaultState, blockModel);
             return;
         }
 
@@ -116,6 +106,21 @@ public class JarItemRenderer extends BlockEntityWithoutLevelRenderer {
         poseStack.translate(0, -y0*2, -1f);
         drawQuad(builder, poseStack, x0, y0, z0, x1, y0, z1, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(), packedLight, packedOverlay, tintColor);
         poseStack.popPose();
+
+        renderJar(poseStack, buffer, packedLight, packedOverlay, defaultState, blockModel);
+    }
+
+    private static void renderJar(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, BlockState defaultState, BakedModel blockModel) {
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer()
+                .renderModel(
+                        poseStack.last(),
+                        buffer.getBuffer(RenderType.translucent()),
+                        defaultState,
+                        blockModel,
+                        1.0f, 1.0f, 1.0f,
+                        packedLight,
+                        packedOverlay
+                );
     }
 
     private void drawVertex(VertexConsumer buffer, PoseStack poseStack,
