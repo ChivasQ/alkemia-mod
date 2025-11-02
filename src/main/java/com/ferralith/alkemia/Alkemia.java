@@ -2,10 +2,7 @@ package com.ferralith.alkemia;
 
 import com.ferralith.alkemia.event.ModEventBusClientEvents;
 import com.ferralith.alkemia.event.ModEventBusEvents;
-import com.ferralith.alkemia.registries.ModBlockEntities;
-import com.ferralith.alkemia.registries.ModBlocks;
-import com.ferralith.alkemia.registries.ModCreativeTab;
-import com.ferralith.alkemia.registries.ModItems;
+import com.ferralith.alkemia.registries.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
@@ -25,43 +22,29 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Alkemia.MODID)
 public class Alkemia {
-    // Define mod id in a common place for everything to reference
     public static final String MODID = "alkemia";
-    // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Alkemia(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the commonSetup method for modloading
+
         modEventBus.addListener(this::commonSetup);
 
-        // Register the Deferred Register to the mod event bus so blocks get registered
         ModBlocks.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so items get registered
         ModItems.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so tabs get registered
         ModCreativeTab.register(modEventBus);
-
         ModBlockEntities.register(modEventBus);
+        ModDataComponents.register(modEventBus);
 
         modEventBus.register(new ModEventBusEvents());
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (Alkemia) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
 
-        // Register the item to a creative tab
-        modEventBus.addListener(this::addCreative);
-
-        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
 
         if (Config.LOG_DIRT_BLOCK.getAsBoolean()) {
@@ -73,17 +56,8 @@ public class Alkemia {
         Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
     }
 
-    // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(ModBlocks.EXAMPLE_BLOCK);
-        }
-    }
-
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+        LOGGER.info("HELLO everynyan");
     }
 }

@@ -73,7 +73,7 @@ public class JarItemRenderer extends BlockEntityWithoutLevelRenderer {
         FluidState fluidState = fluidStack.getFluid().defaultFluidState();
 
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(stillTexture);
-        int tintColor = fluidTypeExtensions.getTintColor(fluidState, null, null);
+        int tintColor = fluidTypeExtensions.getTintColor(fluidStack);
 
         VertexConsumer builder = buffer.getBuffer(ItemBlockRenderTypes.getRenderLayer(fluidState));
 

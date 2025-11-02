@@ -2,6 +2,7 @@ package com.ferralith.alkemia.event;
 
 import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.registries.ModBlockEntities;
+import com.ferralith.alkemia.registries.ModDataComponents;
 import com.ferralith.alkemia.registries.ModItems;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,10 +21,14 @@ public class ModEventBusEvents {
                 (jarBlockEntity, context) -> jarBlockEntity.getFluidTank()
         );
         //TODO: this
-//        event.registerItem(
-//                Capabilities.FluidHandler.ITEM,
-//                (itemStack, context) -> new FluidHandlerItemStack(itemStack, 10000),
-//                ModItems.JAR_ITEM.get()
-//        );
+        event.registerItem(
+                Capabilities.FluidHandler.ITEM,
+                (itemStack, context) -> new FluidHandlerItemStack(
+                        ModDataComponents.FLUID_CONTENT,
+                        itemStack,
+                        10000
+                ),
+                ModItems.JAR_ITEM.get()
+        );
     }
 }

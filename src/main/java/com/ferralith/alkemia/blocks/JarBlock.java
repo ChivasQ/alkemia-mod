@@ -144,30 +144,23 @@ public class JarBlock extends BaseEntityBlock {
     }
 
     //TODO: fix this shit
+    @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         BlockEntity blockentity = level.getBlockEntity(pos);
         if (blockentity instanceof JarBlockEntity jarBlockEntity) {
             if (!level.isClientSide && player.isCreative() && !jarBlockEntity.getFluidTank().isEmpty()) {
                 ItemStack itemstack = new ItemStack(ModItems.JAR_ITEM.asItem());
+                FluidStack fluidInBlock = jarBlockEntity.getFluidTank().getFluid();
 
-                CompoundTag blockEntityTag = new CompoundTag();
-                blockEntityTag.put("fluidTank", jarBlockEntity.getFluidTank().writeToNBT(
-                        level.registryAccess(),
-                        new CompoundTag()
-                ));
+                IFluidHandlerItem itemFluidHandler = itemstack.getCapability(Capabilities.FluidHandler.ITEM);
 
-                itemstack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockEntityTag));
+                if (itemFluidHandler != null) {
+                    itemFluidHandler.fill(fluidInBlock, IFluidHandler.FluidAction.EXECUTE);
+                }
 
-                ItemEntity itementity = new ItemEntity(
-                        level,
-                        pos.getX() + 0.5,
-                        pos.getY() + 0.5,
-                        pos.getZ() + 0.5,
-                        itemstack
-                );
+                ItemEntity itementity = new ItemEntity(level, (double)pos.getX() + 0.5, (double)pos.getY() + 0.5, (double)pos.getZ() + 0.5, itemstack);
                 itementity.setDefaultPickUpDelay();
                 level.addFreshEntity(itementity);
-
             }
         }
 
@@ -177,23 +170,44 @@ public class JarBlock extends BaseEntityBlock {
     @Override
     protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         BlockEntity blockentity = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+
         if (blockentity instanceof JarBlockEntity jarBlockEntity) {
             ItemStack itemstack = new ItemStack(this);
+            FluidStack fluidInBlock = jarBlockEntity.getFluidTank().getFluid();
 
-            if (!jarBlockEntity.getFluidTank().isEmpty()) {
-                CompoundTag blockEntityTag = new CompoundTag();
-                blockEntityTag.put("fluidTank", jarBlockEntity.getFluidTank().writeToNBT(
-                        params.getLevel().registryAccess(),
-                        new CompoundTag()
-                ));
+            if (!fluidInBlock.isEmpty()) {
+                IFluidHandlerItem itemFluidHandler = itemstack.getCapability(Capabilities.FluidHandler.ITEM);
 
-                itemstack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockEntityTag));
+                if (itemFluidHandler != null) {
+                    itemFluidHandler.fill(fluidInBlock, IFluidHandler.FluidAction.EXECUTE);
+                }
             }
 
             return List.of(itemstack);
         }
 
-
         return super.getDrops(state, params);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+
+        if (level.isClientSide) {
+            return;
+        }
+
+        IFluidHandlerItem itemFluidHandler = stack.getCapability(Capabilities.FluidHandler.ITEM);
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+
+        if (itemFluidHandler != null && blockEntity instanceof JarBlockEntity jarBlockEntity) {
+
+            FluidStack fluidToTransfer = itemFluidHandler.getFluidInTank(0);
+
+            if (!fluidToTransfer.isEmpty()) {
+                FluidTank blockTank = jarBlockEntity.getFluidTank();
+                blockTank.fill(fluidToTransfer, IFluidHandler.FluidAction.EXECUTE);
+            }
+        }
     }
 }
