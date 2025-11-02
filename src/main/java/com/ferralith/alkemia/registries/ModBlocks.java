@@ -19,7 +19,7 @@ public class ModBlocks {
             BLOCKS.register(
                     "jar_block",
                     resourceLocation -> new JarBlock(BlockBehaviour.Properties.of()
-                            .noOcclusion())
+                            .noOcclusion().destroyTime(2))
             );
 
 

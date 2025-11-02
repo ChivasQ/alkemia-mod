@@ -1,17 +1,23 @@
 package com.ferralith.alkemia.blocks;
 
 import com.ferralith.alkemia.entity.JarBlockEntity;
+import com.ferralith.alkemia.registries.ModItems;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -20,7 +26,10 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -36,6 +45,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public class JarBlock extends BaseEntityBlock {
@@ -78,10 +88,7 @@ public class JarBlock extends BaseEntityBlock {
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        // Клиентская сторона:
         if (level.isClientSide) {
-            // Если у предмета есть Capability, говорим SUCCESS, чтобы рука махнула.
-            // Иначе - PASS, чтобы палка (например) не вызывала взмах руки.
             return stack.getCapability(Capabilities.FluidHandler.ITEM) != null ?
                     ItemInteractionResult.SUCCESS :
                     ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -93,7 +100,6 @@ public class JarBlock extends BaseEntityBlock {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        // Получаем Capability и запоминаем, сколько жидкости было ДО.
         IFluidHandler blockFluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, state, blockEntity, null);
         if (blockFluidHandler == null) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -101,33 +107,20 @@ public class JarBlock extends BaseEntityBlock {
 
         FluidStack fluidInBlockBefore = blockFluidHandler.getFluidInTank(0).copy();
 
-        // ЭТА ОДНА ФУНКЦИЯ ДЕЛАЕТ ВСЁ:
-        // 1. Проверяет Capability у предмета.
-        // 2. Пытается перелить из item -> block.
-        // 3. Если не вышло, пытается перелить из block -> item.
-        // 4. Обрабатывает замену контейнеров (ведро <-> пустое ведро).
-        // 5. Обрабатывает креативный режим.
-        // 6. Возвращает true, если что-то произошло.
         boolean success = FluidUtil.interactWithFluidHandler(player, hand, level, pos, null);
 
         if (success) {
-            // FluidUtil все сделал. Теперь мы просто проверяем результат, чтобы проиграть звук.
             FluidStack fluidInBlockAfter = blockFluidHandler.getFluidInTank(0);
 
-            // ИСПРАВЛЕННЫЕ ЗВУКИ:
             if (fluidInBlockBefore.isEmpty() && !fluidInBlockAfter.isEmpty()) {
-                // Бак был пуст, а теперь полон -> мы НАПОЛНИЛИ бак (опустошили ведро)
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
             } else if (!fluidInBlockBefore.isEmpty() && fluidInBlockAfter.isEmpty()) {
-                // Бак был полон (или частично), а теперь пуст -> мы ОПУСТОШИЛИ бак (наполнили ведро)
                 level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
-            // (Тут можно добавить еще 'else if' для частичных переливаний, если у них другие звуки)
 
             return ItemInteractionResult.SUCCESS;
         }
 
-        // FluidUtil не смог ничего сделать (например, кликнули не-жидкостным предметом)
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
@@ -148,5 +141,59 @@ public class JarBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
         return ItemInteractionResult.FAIL;
+    }
+
+    //TODO: fix this shit
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        BlockEntity blockentity = level.getBlockEntity(pos);
+        if (blockentity instanceof JarBlockEntity jarBlockEntity) {
+            if (!level.isClientSide && player.isCreative() && !jarBlockEntity.getFluidTank().isEmpty()) {
+                ItemStack itemstack = new ItemStack(ModItems.JAR_ITEM.asItem());
+
+                CompoundTag blockEntityTag = new CompoundTag();
+                blockEntityTag.put("fluidTank", jarBlockEntity.getFluidTank().writeToNBT(
+                        level.registryAccess(),
+                        new CompoundTag()
+                ));
+
+                itemstack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockEntityTag));
+
+                ItemEntity itementity = new ItemEntity(
+                        level,
+                        pos.getX() + 0.5,
+                        pos.getY() + 0.5,
+                        pos.getZ() + 0.5,
+                        itemstack
+                );
+                itementity.setDefaultPickUpDelay();
+                level.addFreshEntity(itementity);
+
+            }
+        }
+
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        BlockEntity blockentity = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (blockentity instanceof JarBlockEntity jarBlockEntity) {
+            ItemStack itemstack = new ItemStack(this);
+
+            if (!jarBlockEntity.getFluidTank().isEmpty()) {
+                CompoundTag blockEntityTag = new CompoundTag();
+                blockEntityTag.put("fluidTank", jarBlockEntity.getFluidTank().writeToNBT(
+                        params.getLevel().registryAccess(),
+                        new CompoundTag()
+                ));
+
+                itemstack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockEntityTag));
+            }
+
+            return List.of(itemstack);
+        }
+
+
+        return super.getDrops(state, params);
     }
 }

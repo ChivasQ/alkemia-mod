@@ -1,10 +1,13 @@
 package com.ferralith.alkemia;
 
+import com.ferralith.alkemia.event.ModEventBusClientEvents;
 import com.ferralith.alkemia.event.ModEventBusEvents;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.registries.ModBlocks;
 import com.ferralith.alkemia.registries.ModCreativeTab;
 import com.ferralith.alkemia.registries.ModItems;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;

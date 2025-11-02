@@ -3,6 +3,7 @@ package com.ferralith.alkemia.entity.renderer;
 import com.ferralith.alkemia.entity.JarBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -66,29 +67,34 @@ public class JarBlockEntityRenderer implements BlockEntityRenderer<JarBlockEntit
 
         float z1 = 0.75f;
         //top
-        drawQuad(builder, poseStack,
-                x0, fluidHeight, z0, x1, fluidHeight, z1,
-                sprite.getU0(), sprite.getV0(),
-                sprite.getU1(), sprite.getV1(),
-                combinedLight, combinedOverlay, tintColor
-        );
+        drawQuad(builder, poseStack, x0, fluidHeight, z0, x1, fluidHeight, z1, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(), combinedLight, combinedOverlay, tintColor);
+
         //sides
-        drawQuad(builder, poseStack,
-                x0, y0, z0, x1, fluidHeight, z0,
-                sprite.getU0(), sprite.getV0(),
-                sprite.getU1(), sprite.getV(f),
-                combinedLight, combinedOverlay, tintColor
-        );
+        drawQuad(builder, poseStack, x0, y0, z0, x1, fluidHeight, z0, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(f), combinedLight, combinedOverlay, tintColor);
 
-        drawQuad(builder, poseStack,
-                x1, y0, z1, x0, fluidHeight, z1,
-                sprite.getU0(), sprite.getV0(),
-                sprite.getU1(), sprite.getV1(),
-                combinedLight, combinedOverlay, tintColor
-        );
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        poseStack.translate(-1f, 0, -1.5f);
+        drawQuad(builder, poseStack, x0, y0, z1, x1, fluidHeight, z1, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(f), combinedLight, combinedOverlay, tintColor);
+        poseStack.popPose();
 
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.translate(-1f, 0, 0);
+        drawQuad(builder, poseStack, x0, y0, z0, x1, fluidHeight, z0, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(f), combinedLight, combinedOverlay, tintColor);
+        poseStack.popPose();
 
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YN.rotationDegrees(90));
+        poseStack.translate(0, 0, -1f);
+        drawQuad(builder, poseStack, x0, y0, z0, x1, fluidHeight, z0, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(f), combinedLight, combinedOverlay, tintColor);
+        poseStack.popPose();
 
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.XP.rotationDegrees(180));
+        poseStack.translate(0, -y0*2, -1f);
+        drawQuad(builder, poseStack, x0, y0, z0, x1, y0, z1, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(), combinedLight, combinedOverlay, tintColor);
+        poseStack.popPose();
     }
 
     private void drawVertex(VertexConsumer buffer, PoseStack poseStack,

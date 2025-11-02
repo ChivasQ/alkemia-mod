@@ -18,6 +18,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
     protected void generate() {
         dropSelf(ModBlocks.EXAMPLE_BLOCK.get());
         dropSelf(ModBlocks.JAR_BLOCK.get());
+
         //see BlockLootSubProvider.java for more examples of drops
     }
 
