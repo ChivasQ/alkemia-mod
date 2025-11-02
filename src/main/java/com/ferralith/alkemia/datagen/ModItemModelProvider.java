@@ -1,7 +1,7 @@
 package com.ferralith.alkemia.datagen;
 
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.ModItems;
+import com.ferralith.alkemia.registries.ModItems;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;

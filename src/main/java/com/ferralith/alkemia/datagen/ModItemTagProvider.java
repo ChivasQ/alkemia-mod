@@ -1,7 +1,7 @@
 package com.ferralith.alkemia.datagen;
 
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.ModItems;
+import com.ferralith.alkemia.registries.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;

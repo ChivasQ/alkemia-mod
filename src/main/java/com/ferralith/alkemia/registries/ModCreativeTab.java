@@ -1,5 +1,6 @@
-package com.ferralith.alkemia;
+package com.ferralith.alkemia.registries;
 
+import com.ferralith.alkemia.Alkemia;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;

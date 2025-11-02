@@ -1,7 +1,7 @@
 package com.ferralith.alkemia.datagen;
 
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.ModBlocks;
+import com.ferralith.alkemia.registries.ModBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
