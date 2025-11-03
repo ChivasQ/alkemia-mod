@@ -19,6 +19,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
         blockWithItem(ModBlocks.EXAMPLE_BLOCK);
         ModelFile jar_model = this.models().withExistingParent("jar_block", this.modLoc("block/jar")).renderType("translucent");
         simpleBlockWithItem(ModBlocks.JAR_BLOCK.get(), jar_model);
+
+        simpleBlock(
+                ModBlocks.MANA_BLOCK.get(),
+                models().getExistingFile(mcLoc("lava"))
+        );
+
     }
 
     private void blockWithItem(DeferredBlock<Block> exampleBlock) {

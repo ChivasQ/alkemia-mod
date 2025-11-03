@@ -3,8 +3,10 @@ package com.ferralith.alkemia.registries;
 import com.ferralith.alkemia.Alkemia;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -19,7 +21,10 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> JAR_ITEM = ITEMS.registerSimpleBlockItem("jar_item", ModBlocks.JAR_BLOCK);
 
-
+    public static final DeferredHolder<Item, BucketItem> MANA_BUCKET = ITEMS.register(
+            "mana_bucket",
+            () -> new BucketItem(ModFluids.SOURCE_MANA.get(), new Item.Properties())
+    );
     public static final DeferredItem<Item> CHALK_ITEM = ITEMS.registerSimpleItem("chalk", new Item.Properties().stacksTo(1).durability(100));
 
     public static void register(IEventBus modEventBus) {

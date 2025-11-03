@@ -74,7 +74,7 @@ public class JarItemRenderer extends BlockEntityWithoutLevelRenderer {
         float z0 = 0.25f;
         float x1 = 0.75f;
         float y1 = 0.75f;
-        float fluidHeight = y0 + (y1 - y0) * f;
+        float fluidHeight = (y0 + (y1 - y0) * f);
 
         float z1 = 0.75f;
         //top

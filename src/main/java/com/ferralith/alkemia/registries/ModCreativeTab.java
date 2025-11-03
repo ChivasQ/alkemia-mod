@@ -17,7 +17,8 @@ public class ModCreativeTab {
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .icon(() -> ModItems.EXAMPLE_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(ModItems.EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
+                output.accept(ModItems.JAR_ITEM.get());
+                output.accept(ModItems.MANA_BUCKET.get());
             }).build());
 
     public static void register(IEventBus modEventBus) {

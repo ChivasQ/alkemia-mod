@@ -2,13 +2,19 @@ package com.ferralith.alkemia.event;
 
 import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.client.JarClientItemExtensions;
+import com.ferralith.alkemia.client.ManaClientFluidTypeExtensions;
 import com.ferralith.alkemia.entity.renderer.JarBlockEntityRenderer;
 import com.ferralith.alkemia.registries.ModBlockEntities;
+import com.ferralith.alkemia.registries.ModBlocks;
+import com.ferralith.alkemia.registries.ModFluids;
 import com.ferralith.alkemia.registries.ModItems;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
@@ -28,6 +34,17 @@ public class ModEventBusClientEvents {
                 new JarClientItemExtensions(),
                 ModItems.JAR_ITEM
         );
+
+        event.registerFluidType(
+                new ManaClientFluidTypeExtensions(),
+                ModFluids.MANA_TYPE.get()
+        );
+    }
+
+    @SubscribeEvent
+    static void onClientSetup(FMLClientSetupEvent event) {
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.SOURCE_MANA.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_MANA.get(), RenderType.translucent());
     }
 
 }

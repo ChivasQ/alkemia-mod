@@ -36,6 +36,7 @@ public class Alkemia {
         ModCreativeTab.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModDataComponents.register(modEventBus);
+        ModFluids.register(modEventBus);
 
         modEventBus.register(new ModEventBusEvents());
 
