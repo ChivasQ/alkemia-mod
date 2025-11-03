@@ -33,6 +33,9 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -57,10 +60,15 @@ public class JarBlock extends BaseEntityBlock {
             Block.box(5, 14, 5, 11, 16, 11)
     ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
     private static final MapCodec<JarBlock> CODEC = simpleCodec(JarBlock::new);
-
+    public static final IntegerProperty LIGHT_LEVEL = IntegerProperty.create("light_level", 0, 15);
 
     public JarBlock(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(LIGHT_LEVEL);
     }
 
     @Override

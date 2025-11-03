@@ -37,6 +37,7 @@ public class Alkemia {
         ModBlockEntities.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModFluids.register(modEventBus);
+        ModParticles.register(modEventBus);
 
         modEventBus.register(new ModEventBusEvents());
 

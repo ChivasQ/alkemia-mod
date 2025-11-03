@@ -22,8 +22,9 @@ public class ModBlocks {
             BLOCKS.register(
                     "jar_block",
                     resourceLocation -> new JarBlock(BlockBehaviour.Properties.of()
-                            .noOcclusion().destroyTime(2))
-            );
+                            .noOcclusion()
+                            .destroyTime(2)
+                            .lightLevel(state -> state.getValue(JarBlock.LIGHT_LEVEL))));
     @SuppressWarnings("deprecation")
     public static final DeferredHolder<Block, AbstractCauldronBlock> COOL_LAVA_CAULDRON = BLOCKS.register(
             "mana_cauldron_block",

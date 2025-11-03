@@ -3,6 +3,7 @@ package com.ferralith.alkemia.fluid;
 import com.ferralith.alkemia.registries.ModBlocks;
 import com.ferralith.alkemia.registries.ModFluids;
 import com.ferralith.alkemia.registries.ModItems;
+import com.ferralith.alkemia.registries.ModParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -159,14 +160,11 @@ public abstract class ManaFluid extends FlowingFluid {
     protected void animateTick(Level level, BlockPos pos, FluidState state, RandomSource random) {
         BlockPos blockpos = pos.above();
         if (level.getBlockState(blockpos).isAir() && !level.getBlockState(blockpos).isSolidRender(level, blockpos)) {
-            if (random.nextInt(10) == 0) {
+            if (random.nextInt(5) == 0) {
                 double d0 = (double)pos.getX() + random.nextDouble();
-                double d1 = (double)pos.getY() + 1.0;
+                double d1 = (double)pos.getY();
                 double d2 = (double)pos.getZ() + random.nextDouble();
-                level.addParticle(ParticleTypes.LAVA, d0, d1, d2, 0.0, 0.0, 0.0);
-                level.playLocalSound(
-                        d0, d1, d2, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false
-                );
+                level.addParticle(ModParticles.MANA_PARTICLE.get(), d0, d1, d2, 0.0, 1.0, 0.0);
             }
 
             if (random.nextInt(200) == 0) {

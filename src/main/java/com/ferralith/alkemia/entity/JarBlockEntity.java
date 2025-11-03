@@ -1,6 +1,7 @@
 package com.ferralith.alkemia.entity;
 
 import com.ferralith.alkemia.Alkemia;
+import com.ferralith.alkemia.blocks.JarBlock;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -26,9 +27,19 @@ public class JarBlockEntity extends BlockEntity {
             @Override
             protected void onContentsChanged() {
                 if (level != null && !level.isClientSide()) {
-                    setChanged();
 
-                    level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                    setChanged();
+                    int currentLightLevel = fluidTank.getFluid().getFluidType().getLightLevel();
+
+                    int stateLightLevel = getBlockState().getValue(JarBlock.LIGHT_LEVEL);
+
+                    if (currentLightLevel != stateLightLevel) {
+                        level.setBlock(worldPosition,
+                                getBlockState().setValue(JarBlock.LIGHT_LEVEL, currentLightLevel),
+                                3);
+                    } else {
+                        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                    }
                 }
             }
         };
