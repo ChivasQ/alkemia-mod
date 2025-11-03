@@ -104,7 +104,6 @@ public class JarBlock extends BaseEntityBlock {
                     ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        // Серверная сторона:
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (!(blockEntity instanceof JarBlockEntity)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
