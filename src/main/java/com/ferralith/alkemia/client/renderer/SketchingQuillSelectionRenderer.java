@@ -1,9 +1,7 @@
 package com.ferralith.alkemia.client.renderer;
 
-import ca.weblite.objc.Client;
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.test.ClientSelectionData;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.ferralith.alkemia.client.ClientSelectionData;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

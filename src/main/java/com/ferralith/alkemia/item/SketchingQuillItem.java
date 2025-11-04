@@ -1,6 +1,6 @@
 package com.ferralith.alkemia.item;
 
-import com.ferralith.alkemia.test.ClientSelectionData;
+import com.ferralith.alkemia.client.ClientSelectionData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;

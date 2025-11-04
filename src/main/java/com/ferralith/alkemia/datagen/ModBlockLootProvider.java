@@ -6,6 +6,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Set;
 
@@ -18,7 +19,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
     protected void generate() {
         dropSelf(ModBlocks.EXAMPLE_BLOCK.get());
         dropSelf(ModBlocks.JAR_BLOCK.get());
-
+        dropSelf(ModBlocks.COOL_LAVA_CAULDRON.get());
         //see BlockLootSubProvider.java for more examples of drops
     }
 

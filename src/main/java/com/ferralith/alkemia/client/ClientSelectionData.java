@@ -1,4 +1,4 @@
-package com.ferralith.alkemia.test;
+package com.ferralith.alkemia.client;
 
 import net.minecraft.core.BlockPos;
 

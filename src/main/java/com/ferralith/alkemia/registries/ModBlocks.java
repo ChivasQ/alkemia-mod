@@ -1,8 +1,9 @@
 package com.ferralith.alkemia.registries;
 
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.blocks.JarBlock;
-import com.ferralith.alkemia.blocks.ManaCauldronBlock;
+import com.ferralith.alkemia.block.ChalkboardPartBlock;
+import com.ferralith.alkemia.block.JarBlock;
+import com.ferralith.alkemia.block.ManaCauldronBlock;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -47,6 +48,12 @@ public class ModBlocks {
                             .sound(SoundType.EMPTY)
             )
     );
+
+    public static final DeferredBlock<Block> CHALKBOARD_BLOCK = BLOCKS.register(
+            "chalkboard_block",
+            () -> new ChalkboardPartBlock(BlockBehaviour.Properties.of().strength(4).noCollission())
+    );
+
 
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);

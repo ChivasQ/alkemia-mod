@@ -1,4 +1,4 @@
-package com.ferralith.alkemia.blocks;
+package com.ferralith.alkemia.block;
 
 import com.ferralith.alkemia.registries.ModItems;
 import com.mojang.serialization.MapCodec;
