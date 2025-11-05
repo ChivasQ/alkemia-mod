@@ -28,13 +28,16 @@ public class MasterChalkboardEntity extends BlockEntity {
         super(ModBlockEntities.MASTER_CHALKBOARD_ENTITY.get(), pos, blockState);
     }
 
-    public void setPixel(BlockPos blockPos, int localX, int localY, byte color) {
+    public void setPixelServer(BlockPos blockPos, int localX, int localY, byte color) {
         byte[][] blockPixels = pixels.computeIfAbsent(
                 blockPos,
                 k -> new byte[BLOCK_PIXELS][BLOCK_PIXELS]
         );
 
-        blockPixels[localY][localX] = color;
+        if (blockPixels[localY][localX] != color) {
+            blockPixels[localY][localX] = color;
+            setChanged();
+        }
     }
 
     public Map<BlockPos, byte[][]> getPixels() {
@@ -149,5 +152,14 @@ public class MasterChalkboardEntity extends BlockEntity {
         saveAdditional(tag, registries);
         System.out.println("Sending update tag with " + pixels.size() + " blocks");
         return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        loadAdditional(tag, registries);
+
+        if (level != null && level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 2);
+        }
     }
 }

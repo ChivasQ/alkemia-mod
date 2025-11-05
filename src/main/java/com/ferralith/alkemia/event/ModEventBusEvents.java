@@ -3,6 +3,7 @@ package com.ferralith.alkemia.event;
 import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.network.data.ChalkboardPixelsData;
 import com.ferralith.alkemia.network.handler.C2S_ChalkboardPixelsDataPayloadHandler;
+import com.ferralith.alkemia.network.handler.S2C_ChalkboardPixelsDataPayloadHandler;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.registries.ModDataComponents;
 import com.ferralith.alkemia.registries.ModItems;
@@ -41,7 +42,7 @@ public class ModEventBusEvents {
                 ChalkboardPixelsData.TYPE,
                 ChalkboardPixelsData.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
-                        null,
+                        S2C_ChalkboardPixelsDataPayloadHandler::handleDataOnNetwork,
                         C2S_ChalkboardPixelsDataPayloadHandler::handleDataOnNetwork
                 )
         );
