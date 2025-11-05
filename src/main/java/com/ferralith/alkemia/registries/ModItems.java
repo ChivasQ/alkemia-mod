@@ -1,6 +1,7 @@
 package com.ferralith.alkemia.registries;
 
 import com.ferralith.alkemia.Alkemia;
+import com.ferralith.alkemia.item.ChalkItem;
 import com.ferralith.alkemia.item.SketchingQuillItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
@@ -28,7 +29,7 @@ public class ModItems {
 
     public static final DeferredItem<Item> SKETCHING_QUILL = ITEMS.register("sketching_quill", () -> new SketchingQuillItem(new Item.Properties()));
 
-    public static final DeferredItem<Item> CHALK_ITEM = ITEMS.registerSimpleItem("chalk", new Item.Properties().stacksTo(1).durability(100));
+    public static final DeferredItem<Item> CHALK_ITEM = ITEMS.register("chalk", () ->  new ChalkItem(new Item.Properties().stacksTo(1).durability(100)));
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

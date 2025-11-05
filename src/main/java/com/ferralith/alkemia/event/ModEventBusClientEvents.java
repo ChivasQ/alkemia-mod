@@ -12,14 +12,12 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 @EventBusSubscriber(modid = Alkemia.MODID, value = Dist.CLIENT)
@@ -70,5 +68,23 @@ public class ModEventBusClientEvents {
     public static void onClientTick(ClientTickEvent.Post event) {
         QuillSelectionCancel.cancelIfNeeded();
         DrawHandler.handleDrawing();
+    }
+
+
+    @SubscribeEvent
+    public static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
+        event.register(
+                (itemStack, tintIndex) -> {
+                    Byte colorId = itemStack.get(ModDataComponents.COLOR.get());
+                    if (colorId == null) {
+                        colorId = (byte) 0;
+                    }
+
+                    DyeColor dyeColor = DyeColor.byId((int) colorId);
+                    return dyeColor.getTextureDiffuseColor();
+
+                },
+                ModItems.CHALK_ITEM.get()
+        );
     }
 }

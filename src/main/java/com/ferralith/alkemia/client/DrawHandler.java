@@ -3,11 +3,13 @@ package com.ferralith.alkemia.client;
 import com.ferralith.alkemia.block.ChalkboardPartBlock;
 import com.ferralith.alkemia.entity.chalkboard.ChalkboardPartEntity;
 import com.ferralith.alkemia.entity.chalkboard.MasterChalkboardEntity;
+import com.ferralith.alkemia.registries.ModDataComponents;
 import com.ferralith.alkemia.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -73,12 +75,13 @@ public class DrawHandler {
             double localZ = hitVec.z - partPos.getZ();
             int pixelX_local = (int) (localX * 16);
             int pixelZ_local = (int) (localZ * 16);
-
+            Byte colorId = itemInHand.get(ModDataComponents.COLOR);
+            if (colorId == null) colorId = (byte) 0;
 
             if (oldMouseX == null || oldMouseZ == null) {
-                masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) 1, 3); //TODO: MAKE COLOR SYSTEM
+                masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) (colorId+1), 3); //TODO: MAKE COLOR SYSTEM
             } else {
-                masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) 1, 3); //FIXME: FIX LINE ALG
+                masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) (colorId+1), 3); //FIXME: FIX LINE ALG
                 //line2d(pixelZ_local, pixelX_local, oldMouseX, oldMouseZ, masterBE, partPos);
             }
             oldMouseX = pixelZ_local;

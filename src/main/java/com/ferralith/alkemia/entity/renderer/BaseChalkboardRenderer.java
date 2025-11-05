@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
@@ -35,11 +36,12 @@ public abstract class BaseChalkboardRenderer<T extends BlockEntity> implements B
                     float minZ = z_local * pixelSize - 0.5f;
                     float maxX = minX + pixelSize;
                     float maxZ = minZ + pixelSize;
-
-                    vertexConsumer.addVertex(matrix, minX, 0, minZ).setColor(1f, 1f, 1f, 1f).setLight(light).setOverlay(overlay);
-                    vertexConsumer.addVertex(matrix, maxX, 0, minZ).setColor(1f, 1f, 1f, 1f).setLight(light).setOverlay(overlay);
-                    vertexConsumer.addVertex(matrix, maxX, 0, maxZ).setColor(1f, 1f, 1f, 1f).setLight(light).setOverlay(overlay);
-                    vertexConsumer.addVertex(matrix, minX, 0, maxZ).setColor(1f, 1f, 1f, 1f).setLight(light).setOverlay(overlay);
+                    DyeColor dyeColor = DyeColor.byId(color-1);
+                    int int_color = dyeColor.getTextureDiffuseColor();
+                    vertexConsumer.addVertex(matrix, minX, 0, minZ).setColor(int_color).setLight(light).setOverlay(overlay);
+                    vertexConsumer.addVertex(matrix, maxX, 0, minZ).setColor(int_color).setLight(light).setOverlay(overlay);
+                    vertexConsumer.addVertex(matrix, maxX, 0, maxZ).setColor(int_color).setLight(light).setOverlay(overlay);
+                    vertexConsumer.addVertex(matrix, minX, 0, maxZ).setColor(int_color).setLight(light).setOverlay(overlay);
                 }
             }
         }

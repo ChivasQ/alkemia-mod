@@ -5,11 +5,16 @@ import com.ferralith.alkemia.network.data.ChalkboardPixelsData;
 import com.ferralith.alkemia.network.handler.C2S_ChalkboardPixelsDataPayloadHandler;
 import com.ferralith.alkemia.network.handler.S2C_ChalkboardPixelsDataPayloadHandler;
 import com.ferralith.alkemia.registries.ModBlockEntities;
+import com.ferralith.alkemia.registries.ModCreativeTab;
 import com.ferralith.alkemia.registries.ModDataComponents;
 import com.ferralith.alkemia.registries.ModItems;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
@@ -46,5 +51,17 @@ public class ModEventBusEvents {
                         C2S_ChalkboardPixelsDataPayloadHandler::handleDataOnNetwork
                 )
         );
+    }
+
+    @SubscribeEvent
+    public void addAllDyes(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTab() == ModCreativeTab.EXAMPLE_TAB.get()) {
+            for (DyeColor color : DyeColor.values()) {
+                ItemStack coloredChalk = ModItems.CHALK_ITEM.get().getDefaultInstance();
+                coloredChalk.set(ModDataComponents.COLOR, (byte) color.getId());
+                System.out.println("color id:" + (byte) color.getId());
+                event.accept(coloredChalk);
+            }
+        }
     }
 }

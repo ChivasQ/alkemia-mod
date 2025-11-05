@@ -19,7 +19,6 @@ public class ModCreativeTab {
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.JAR_ITEM.get());
                 output.accept(ModItems.MANA_BUCKET.get());
-                output.accept(ModItems.CHALK_ITEM.get());
             }).build());
 
     public static void register(IEventBus modEventBus) {
