@@ -78,7 +78,8 @@ public class DrawHandler {
             if (oldMouseX == null || oldMouseZ == null) {
                 masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) 1, 3); //TODO: MAKE COLOR SYSTEM
             } else {
-                line2d(pixelZ_local, pixelX_local, oldMouseX, oldMouseZ, masterBE, partPos);
+                masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) 1, 3); //FIXME: FIX LINE ALG
+                //line2d(pixelZ_local, pixelX_local, oldMouseX, oldMouseZ, masterBE, partPos);
             }
             oldMouseX = pixelZ_local;
             oldMouseZ = pixelX_local;
@@ -119,5 +120,76 @@ public class DrawHandler {
             }
         }
 
+    }
+
+    private static void newline2d(int g_x0, int g_z0, int g_x1, int g_z1, MasterChalkboardEntity masterBE, int yLevel, byte color) {
+        int dx = Math.abs(g_x1 - g_x0);
+        int dy = Math.abs(g_z1 - g_z0);
+        int sx = g_x0 < g_x1 ? 1 : -1;
+        int sy = g_z0 < g_z1 ? 1 : -1;
+        int err = dx - dy;
+
+        while (true) {
+            int blockX = Math.floorDiv(g_x0, 16);
+            int blockZ = Math.floorDiv(g_z0, 16);
+            BlockPos currentPos = new BlockPos(blockX, yLevel, blockZ);
+
+            int localX = Math.floorMod(g_x0, 16);
+            int localZ = Math.floorMod(g_z0, 16);
+
+            masterBE.setPixelClient(currentPos, localX, localZ, color, 3);
+
+            if ((g_x0 == g_x1) && (g_z0 == g_z1)) break;
+            int e2 = 2 * err;
+
+            if (e2 > -dy) {
+                err -= dy;
+                g_x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                g_z0 += sy;
+            }
+        }
+    }
+
+    private static void newhandleDrawing(MasterChalkboardEntity masterBE, Minecraft mc, BlockHitResult blockHitResult, BlockPos partPos) {
+        var itemInHand = mc.player.getItemInHand(InteractionHand.MAIN_HAND);
+
+        Vec3 hitVec = blockHitResult.getLocation();
+
+        int pixelX_local = (int) Math.floor((hitVec.x - partPos.getX()) * 16);
+        int pixelZ_local = (int) Math.floor((hitVec.z - partPos.getZ()) * 16);
+
+        int globalPixelX = Math.floorDiv((int)Math.floor(hitVec.x * 16), 1);
+        int globalPixelZ = Math.floorDiv((int)Math.floor(hitVec.z * 16), 1);
+
+
+        byte color = (byte) 0; //erasing color
+        boolean drawing = false;
+
+        if (itemInHand.getItem() == ModItems.CHALK_ITEM.get()) {
+            color = (byte) 1;
+            drawing = true;
+        } else if (itemInHand.isEmpty() && mc.player.isShiftKeyDown()) {
+            color = (byte) 0; //erasing color
+            drawing = true;
+        }
+
+        if (drawing) {
+            if (oldMouseX == null || oldMouseZ == null) {
+                masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, color, 3);
+            } else {
+                newline2d(
+                        globalPixelZ, globalPixelX,
+                        oldMouseX, oldMouseZ,
+                        masterBE,
+                        partPos.getY(),
+                        color
+                );
+            }
+            oldMouseX = globalPixelZ;
+            oldMouseZ = globalPixelX;
+        }
     }
 }

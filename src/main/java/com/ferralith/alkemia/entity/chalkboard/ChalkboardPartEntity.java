@@ -25,7 +25,6 @@ public class ChalkboardPartEntity extends BlockEntity {
         return null;
     }
 
-
     public ChalkboardPartEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.CHALKBOARD_PART_ENTITY.get(), pPos, pBlockState);
     }

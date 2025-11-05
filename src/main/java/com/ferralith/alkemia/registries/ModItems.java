@@ -17,8 +17,7 @@ public class ModItems {
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK);
 
     // Creates a new food item with the id "alkemia:example_id", nutrition 1 and saturation 2
-    public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
-            .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
+    public static final DeferredItem<BlockItem> CHALKBOARD_ITEM = ITEMS.registerSimpleBlockItem("chalkboard_item", ModBlocks.CHALKBOARD_BLOCK);
 
     public static final DeferredItem<BlockItem> JAR_ITEM = ITEMS.registerSimpleBlockItem("jar_item", ModBlocks.JAR_BLOCK);
 

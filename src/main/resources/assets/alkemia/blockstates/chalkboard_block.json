@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "master=false": { "model": "alkemia:block/chalkboard_part" },
+    "master=true": { "model": "alkemia:block/chalkboard_master" }
+  }
+}

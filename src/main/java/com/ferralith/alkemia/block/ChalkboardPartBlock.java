@@ -47,6 +47,54 @@ public class ChalkboardPartBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+
+        if (level.isClientSide) {
+            return;
+        }
+        BlockPos masterPos = null;
+        BlockPos[] offs = {
+                pos.north(), pos.south(), pos.east(), pos.west()
+        };
+
+        for (BlockPos checkPos : offs) {
+            BlockEntity be = level.getBlockEntity(checkPos);
+
+            if (be instanceof MasterChalkboardEntity master) {
+                masterPos = master.getBlockPos();
+                break;
+            }
+            if (be instanceof ChalkboardPartEntity part) {
+                masterPos = part.getMaster(level).getBlockPos();
+                if (masterPos != null) {
+                    break;
+                }
+            }
+        }
+
+        if (masterPos == null) {
+            if (!state.getValue(MASTER)) {
+                level.setBlock(pos, state.setValue(MASTER, true), 3);
+            }
+            return;
+        }
+
+        if (masterPos != null) {
+            BlockEntity thisBE = level.getBlockEntity(pos);
+
+            if (state.getValue(MASTER)) {
+                level.setBlock(pos, state.setValue(MASTER, false), 3);
+                thisBE = level.getBlockEntity(pos);
+            }
+
+            if (thisBE instanceof ChalkboardPartEntity thisPart) {
+                thisPart.setMaster(masterPos);
+            }
+        }
+    }
+
+    @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         return super.getTicker(level, state, blockEntityType);
     }
@@ -58,7 +106,7 @@ public class ChalkboardPartBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState pState) {
-        return RenderShape.INVISIBLE;
+        return RenderShape.MODEL;
     }
 
     public static final VoxelShape SHAPE = java.util.Optional.of(Block.box(0, 0, 0, 16, 0.5f, 16)).get();
