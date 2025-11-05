@@ -11,7 +11,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Map;
 
-public class ChalkboardPixelsDataServerPayloadHandler {
+public class C2S_ChalkboardPixelsDataPayloadHandler {
     public static void handleDataOnNetwork(final ChalkboardPixelsData data, final IPayloadContext context) {
 
         context.enqueueWork(() -> {
@@ -32,13 +32,12 @@ public class ChalkboardPixelsDataServerPayloadHandler {
 
                             for (int x = 0; x < 16; x++) {
                                 for (int y = 0; y < 16; y++) {
-                                    masterChalkboard.setPixel(pos, x, y, color_arr[y * 16 + x]);
+                                    byte c = color_arr[y * 16 + x];
+                                    masterChalkboard.setPixel(pos, x, y, c);
                                 }
                             }
-                            masterChalkboard.markDirtyAndSync();
-                            // FIXME: MAP IS EMPTY
                         }
-
+                        masterChalkboard.markDirtyAndSync();
                     }
                 }
             }

@@ -15,10 +15,11 @@ public class ModCreativeTab {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.alkemia")) //The language key for the title of your CreativeModeTab
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ModItems.EXAMPLE_ITEM.get().getDefaultInstance())
+            .icon(() -> ModItems.CHALK_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.JAR_ITEM.get());
                 output.accept(ModItems.MANA_BUCKET.get());
+                output.accept(ModItems.CHALK_ITEM.get());
             }).build());
 
     public static void register(IEventBus modEventBus) {

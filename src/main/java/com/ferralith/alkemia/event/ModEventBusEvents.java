@@ -2,20 +2,15 @@ package com.ferralith.alkemia.event;
 
 import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.network.data.ChalkboardPixelsData;
-import com.ferralith.alkemia.network.handler.ChalkboardPixelsDataServerPayloadHandler;
+import com.ferralith.alkemia.network.handler.C2S_ChalkboardPixelsDataPayloadHandler;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.registries.ModDataComponents;
 import com.ferralith.alkemia.registries.ModItems;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handlers.ClientPayloadHandler;
-import net.neoforged.neoforge.network.handlers.ServerPayloadHandler;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -47,7 +42,7 @@ public class ModEventBusEvents {
                 ChalkboardPixelsData.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(
                         null,
-                        ChalkboardPixelsDataServerPayloadHandler::handleDataOnNetwork
+                        C2S_ChalkboardPixelsDataPayloadHandler::handleDataOnNetwork
                 )
         );
     }

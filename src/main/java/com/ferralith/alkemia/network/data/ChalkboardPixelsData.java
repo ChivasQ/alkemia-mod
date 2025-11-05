@@ -17,27 +17,33 @@ public record ChalkboardPixelsData(BlockPos pos, Map<BlockPos, byte[]> pixels) i
 
     public static final StreamCodec<ByteBuf, ChalkboardPixelsData> STREAM_CODEC = new StreamCodec<>() {
 
-        private static final StreamCodec<ByteBuf, byte[]> PIXEL_ARRAY_CODEC = ByteBufCodecs.byteArray(256);
-
-        private static final StreamCodec<ByteBuf, Map<BlockPos, byte[]>> MAP_CODEC = ByteBufCodecs.map(
-                HashMap::new,
-                BlockPos.STREAM_CODEC,
-                PIXEL_ARRAY_CODEC
-        );
-
         @Override
         public void encode(ByteBuf buffer, ChalkboardPixelsData data) {
-            BlockPos.STREAM_CODEC.encode(buffer, data.pos());
-            MAP_CODEC.encode(buffer, data.pixels());
+            buffer.writeLong(data.pos.asLong());
+            buffer.writeInt(data.pixels.size());
+            for (Map.Entry<BlockPos, byte[]> entry : data.pixels.entrySet()) {
+                buffer.writeLong(entry.getKey().asLong());
+
+                buffer.writeBytes(entry.getValue());
+            }
+            System.out.println("ENCODE INPUT MAP SIZE: " + data.pixels.size());
         }
 
         @Override
         public ChalkboardPixelsData decode(ByteBuf buffer) {
-            BlockPos masterPos = BlockPos.STREAM_CODEC.decode(buffer);
+            BlockPos pos = BlockPos.of(buffer.readLong());
+            int size = buffer.readInt();
+            System.out.println("DECODE INPUT BUF SIZE: " + size);
+            Map<BlockPos, byte[]> outMap = new HashMap<>();
+            for (int i = 0; i < size; i++) {
+                BlockPos blockpos = BlockPos.of(buffer.readLong());
+                byte[] bytes = new byte[256];
+                buffer.readBytes(bytes);
 
-            Map<BlockPos, byte[]> pixelMap = MAP_CODEC.decode(buffer);
+                outMap.put(blockpos, bytes);
 
-            return new ChalkboardPixelsData(masterPos, pixelMap);
+            }
+            return new ChalkboardPixelsData(pos, outMap);
         }
     };
 

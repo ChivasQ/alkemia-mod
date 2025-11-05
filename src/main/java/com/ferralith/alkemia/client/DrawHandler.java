@@ -91,7 +91,7 @@ public class DrawHandler {
             int pixelX_local = (int) (localX * 16);
             int pixelZ_local = (int) (localZ * 16);
 
-            masterBE.setPixelClient(partPos, pixelX_local, pixelZ_local, (byte) -1,  9);
+            masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) 0,  9);
             return;
         }
     }
