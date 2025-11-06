@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class MasterChalkboardEntity extends BlockEntity {
     private static final int BLOCK_PIXELS = 16;
-    private final Map<BlockPos, byte[][]> pixels = new HashMap<>();
+    private Map<BlockPos, byte[][]> pixels = new HashMap<>();
 
     @OnlyIn(Dist.CLIENT)
     private final Map<BlockPos, byte[]> dirtyBlocksBuffer = new HashMap<>();
@@ -28,7 +28,13 @@ public class MasterChalkboardEntity extends BlockEntity {
         super(ModBlockEntities.MASTER_CHALKBOARD_ENTITY.get(), pos, blockState);
     }
 
+    public void getEntries() {
+        //System.out.println(pixels.entrySet());
+    }
+
     public void setPixelServer(BlockPos blockPos, int localX, int localY, byte color) {
+        if (pixels == null) return;
+
         byte[][] blockPixels = pixels.computeIfAbsent(
                 blockPos,
                 k -> new byte[BLOCK_PIXELS][BLOCK_PIXELS]
@@ -52,6 +58,8 @@ public class MasterChalkboardEntity extends BlockEntity {
     }
     @OnlyIn(Dist.CLIENT)
     public void setPixelClient(BlockPos blockPos, int localX, int localY, byte value, int radius) {
+        if (pixels == null) return;
+
         // TODO: radius logic
 
         byte[][] blockPixels = pixels.computeIfAbsent(
@@ -64,19 +72,50 @@ public class MasterChalkboardEntity extends BlockEntity {
         }
 
         blockPixels[localY][localX] = value;
+    }
 
-        byte[] dirtyBlockPixels = this.dirtyBlocksBuffer.computeIfAbsent(
-                blockPos,
-                k -> new byte[BLOCK_PIXELS * BLOCK_PIXELS]
-        );
+    @OnlyIn(Dist.CLIENT)
+    public void setGlobalPixelClient(int globalX, int globalZ, byte value, int radius) {
+        if (pixels == null) return;
 
-        for (int y = 0; y < 16; y++) {
-            for (int x = 0; x < 16; x++) {
-                dirtyBlockPixels[y * 16 + x] = blockPixels[y][x];
+        for (int dx = -radius/2; dx <= radius/2; dx++) {
+            for (int dz = -radius/2; dz <= radius/2; dz++) {
+
+                int currentGlobalX = globalX + dx;
+                int currentGlobalZ = globalZ + dz;
+
+                int blockX = Math.floorDiv(currentGlobalX, 16);
+                int blockZ = Math.floorDiv(currentGlobalZ, 16);
+                int localX = Math.floorMod(currentGlobalX, 16);
+                int localZ = Math.floorMod(currentGlobalZ, 16);
+
+                BlockPos blockPos = new BlockPos(blockX, this.worldPosition.getY(), blockZ);
+
+                byte[][] blockPixels = pixels.computeIfAbsent(
+                        blockPos,
+                        k -> new byte[BLOCK_PIXELS][BLOCK_PIXELS]
+                );
+
+
+
+                if (blockPixels[localX][localZ] == value) {
+                    continue;
+                }
+
+                blockPixels[localX][localZ] = value;
+
+                byte[] dirtyBlockPixels = this.dirtyBlocksBuffer.computeIfAbsent(
+                        blockPos,
+                        k -> new byte[BLOCK_PIXELS * BLOCK_PIXELS]
+                );
+
+                for (int y = 0; y < 16; y++) {
+                    System.arraycopy(blockPixels[y], 0, dirtyBlockPixels, y * 16 + 0, 16);
+
+                }
             }
         }
     }
-
     @OnlyIn(Dist.CLIENT)
     public void clearClient() {
         dirtyBlocksBuffer.clear();
@@ -84,9 +123,11 @@ public class MasterChalkboardEntity extends BlockEntity {
 
     @OnlyIn(Dist.CLIENT)
     public void tickClient() {
+        if (pixels == null) return;
+
         long now = System.currentTimeMillis();
-        if (!this.dirtyBlocksBuffer.isEmpty() && (now - this.lastBufferSendTime > 250)) {
-            System.out.println("SIZE OF MAP BEFORE SENDING TO SERVER: " + this.dirtyBlocksBuffer.size());
+        if (!this.dirtyBlocksBuffer.isEmpty() && (now - this.lastBufferSendTime > 500)) {
+            //System.out.println("SIZE OF MAP BEFORE SENDING TO SERVER: " + this.dirtyBlocksBuffer.size());
             Map<BlockPos, byte[]> tmpCopy = new HashMap<>(this.dirtyBlocksBuffer);
             PacketDistributor.sendToServer(new ChalkboardPixelsData(this.worldPosition, tmpCopy));
 
@@ -102,7 +143,7 @@ public class MasterChalkboardEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-
+        if (pixels == null) return;
         for (Map.Entry<BlockPos, byte[][]> entry : pixels.entrySet()) {
             BlockPos pos = entry.getKey();
             byte[][] colorArr = entry.getValue();
@@ -115,15 +156,15 @@ public class MasterChalkboardEntity extends BlockEntity {
             }
             tag.putByteArray("data_" + pos.asLong(), pixelData);
         }
-        System.out.println("ho");
-        System.out.println(tag);
+//        System.out.println("ho");
+//        System.out.println(tag);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        System.out.println("hi");
-        System.out.println(tag);
+//        System.out.println("hi");
+//        System.out.println(tag);
         pixels.clear();
 
         for (String key : tag.getAllKeys()) {
@@ -150,7 +191,7 @@ public class MasterChalkboardEntity extends BlockEntity {
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
         saveAdditional(tag, registries);
-        System.out.println("Sending update tag with " + pixels.size() + " blocks");
+        //System.out.println("Sending update tag with " + pixels.size() + " blocks");
         return tag;
     }
 
@@ -162,4 +203,13 @@ public class MasterChalkboardEntity extends BlockEntity {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 2);
         }
     }
+
+    public void removeBlock(BlockPos pos) {
+        pixels.remove(pos);
+    }
+
+    public void getRidOfMap() {
+        pixels = null;
+    }
+
 }

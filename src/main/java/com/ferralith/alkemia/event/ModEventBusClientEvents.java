@@ -5,6 +5,7 @@ import com.ferralith.alkemia.client.*;
 import com.ferralith.alkemia.client.renderer.SketchingQuillSelectionRenderer;
 import com.ferralith.alkemia.entity.renderer.JarBlockEntityRenderer;
 import com.ferralith.alkemia.entity.renderer.MasterChalkboardRenderer;
+import com.ferralith.alkemia.entity.renderer.PartChalkboardRenderer;
 import com.ferralith.alkemia.particle.ManaParticle;
 import com.ferralith.alkemia.registries.*;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,10 @@ public class ModEventBusClientEvents {
         event.registerBlockEntityRenderer(
                 ModBlockEntities.MASTER_CHALKBOARD_ENTITY.get(),
                 MasterChalkboardRenderer::new
+        );
+        event.registerBlockEntityRenderer(
+                ModBlockEntities.CHALKBOARD_PART_ENTITY.get(),
+                PartChalkboardRenderer::new
         );
     }
 

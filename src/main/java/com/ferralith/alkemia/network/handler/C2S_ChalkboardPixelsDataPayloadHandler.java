@@ -19,6 +19,7 @@ public class C2S_ChalkboardPixelsDataPayloadHandler {
         context.enqueueWork(() -> {
             Player player = context.player();
             if (player instanceof ServerPlayer serverPlayer) {
+                System.out.println("server");
                 Level level = serverPlayer.level();
                 BlockPos masterPos = data.pos();
                 PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, level.getChunkAt(masterPos).getPos(), data);

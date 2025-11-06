@@ -26,14 +26,14 @@ public record ChalkboardPixelsData(BlockPos pos, Map<BlockPos, byte[]> pixels) i
 
                 buffer.writeBytes(entry.getValue());
             }
-            System.out.println("ENCODE INPUT MAP SIZE: " + data.pixels.size());
+//            System.out.println("ENCODE INPUT MAP SIZE: " + data.pixels.size());
         }
 
         @Override
         public ChalkboardPixelsData decode(ByteBuf buffer) {
             BlockPos pos = BlockPos.of(buffer.readLong());
             int size = buffer.readInt();
-            System.out.println("DECODE INPUT BUF SIZE: " + size);
+//            System.out.println("DECODE INPUT BUF SIZE: " + size);
             Map<BlockPos, byte[]> outMap = new HashMap<>();
             for (int i = 0; i < size; i++) {
                 BlockPos blockpos = BlockPos.of(buffer.readLong());
