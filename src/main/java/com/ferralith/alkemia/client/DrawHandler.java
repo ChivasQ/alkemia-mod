@@ -68,20 +68,18 @@ public class DrawHandler {
     }
     private static void handleDrawing(MasterChalkboardEntity masterBE, Minecraft mc, BlockHitResult blockHitResult, BlockPos partPos) {
         var itemInHand = mc.player.getItemInHand(InteractionHand.MAIN_HAND);
+        Vec3 hitVec = blockHitResult.getLocation();
+
+        double localX = hitVec.x - partPos.getX();
+        double localZ = hitVec.z - partPos.getZ();
+        int pixelX_local = (int) (localX * 16);
+        int pixelZ_local = (int) (localZ * 16);
+        int globalX = partPos.getX() * 16 + pixelX_local;
+        int globalZ = partPos.getZ() * 16 + pixelZ_local;
 
         if (itemInHand.getItem() == ModItems.CHALK_ITEM.get()) {
-            Vec3 hitVec = blockHitResult.getLocation();
-
-            double localX = hitVec.x - partPos.getX();
-            double localZ = hitVec.z - partPos.getZ();
-            int pixelX_local = (int) (localX * 16);
-            int pixelZ_local = (int) (localZ * 16);
-
             Byte colorId = itemInHand.get(ModDataComponents.COLOR);
             if (colorId == null) colorId = (byte) 0;
-
-            int globalX = partPos.getX() * 16 + pixelX_local;
-            int globalZ = partPos.getZ() * 16 + pixelZ_local;
 
             if (oldMouseX == null || oldMouseZ == null) {
                 masterBE.setGlobalPixelClient(globalX, globalZ, (byte) (colorId + 1), 3);
@@ -94,13 +92,7 @@ public class DrawHandler {
             return;
 
         } else if (itemInHand.isEmpty() && mc.player.isShiftKeyDown()) {
-            Vec3 hitVec = blockHitResult.getLocation();
-            double localX = hitVec.x - partPos.getX();
-            double localZ = hitVec.z - partPos.getZ();
-            int pixelX_local = (int) (localX * 16);
-            int pixelZ_local = (int) (localZ * 16);
-
-            masterBE.setPixelClient(partPos, pixelZ_local, pixelX_local, (byte) 0, 9);
+            masterBE.setGlobalPixelClient(globalX, globalZ, (byte) 0, 5);
 
             oldMouseX = null;
             oldMouseZ = null;

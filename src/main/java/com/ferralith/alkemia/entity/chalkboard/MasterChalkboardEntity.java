@@ -126,7 +126,7 @@ public class MasterChalkboardEntity extends BlockEntity {
         if (pixels == null) return;
 
         long now = System.currentTimeMillis();
-        if (!this.dirtyBlocksBuffer.isEmpty() && (now - this.lastBufferSendTime > 500)) {
+        if (!this.dirtyBlocksBuffer.isEmpty() && (now - this.lastBufferSendTime > 250)) {
             //System.out.println("SIZE OF MAP BEFORE SENDING TO SERVER: " + this.dirtyBlocksBuffer.size());
             Map<BlockPos, byte[]> tmpCopy = new HashMap<>(this.dirtyBlocksBuffer);
             PacketDistributor.sendToServer(new ChalkboardPixelsData(this.worldPosition, tmpCopy));

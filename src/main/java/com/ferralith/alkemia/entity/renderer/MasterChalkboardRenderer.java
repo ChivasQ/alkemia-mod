@@ -20,6 +20,7 @@ public class MasterChalkboardRenderer extends BaseChalkboardRenderer<MasterChalk
         masterBE.tickClient();
 
         byte[][] pixels = masterBE.getBlockPixels(masterBE.getBlockPos());
+
         renderFace(poseStack, multiBufferSource, pixels, 0, combinedLight, combinedOverlay);
 
     }
