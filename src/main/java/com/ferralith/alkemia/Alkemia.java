@@ -38,7 +38,7 @@ public class Alkemia {
         ModDataComponents.register(modEventBus);
         ModFluids.register(modEventBus);
         ModParticles.register(modEventBus);
-
+        ModAttachments.register(modEventBus);
         modEventBus.register(new ModEventBusEvents());
 
         NeoForge.EVENT_BUS.register(this);

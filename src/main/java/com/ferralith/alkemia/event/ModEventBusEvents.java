@@ -1,6 +1,7 @@
 package com.ferralith.alkemia.event;
 
 import com.ferralith.alkemia.Alkemia;
+import com.ferralith.alkemia.client.RitualDrawHandler;
 import com.ferralith.alkemia.network.data.ChalkboardPixelsData;
 import com.ferralith.alkemia.network.handler.C2S_ChalkboardPixelsDataPayloadHandler;
 import com.ferralith.alkemia.network.handler.S2C_ChalkboardPixelsDataPayloadHandler;
@@ -15,6 +16,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
@@ -64,4 +66,5 @@ public class ModEventBusEvents {
             }
         }
     }
+
 }

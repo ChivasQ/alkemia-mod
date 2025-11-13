@@ -4,6 +4,7 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.entity.chalkboard.ChalkboardPartEntity;
 import com.ferralith.alkemia.entity.JarBlockEntity;
 import com.ferralith.alkemia.entity.chalkboard.MasterChalkboardEntity;
+import com.ferralith.alkemia.entity.ritualblock.RitualMasterBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -31,6 +32,12 @@ public class ModBlockEntities {
             BLOCK_ENTITIES.register("master_chalkboard_entity",
                     () -> BlockEntityType.Builder.of(MasterChalkboardEntity::new,
                             ModBlocks.CHALKBOARD_BLOCK.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RitualMasterBlockEntity>> MASTER_RITUAL_ENTITY =
+            BLOCK_ENTITIES.register("master_ritual_entity",
+                    () -> BlockEntityType.Builder.of(RitualMasterBlockEntity::new,
+                            ModBlocks.RITUAL_BLOCK.get()).build(null));
+
 
     public static void register(IEventBus eventBus){
         BLOCK_ENTITIES.register(eventBus);

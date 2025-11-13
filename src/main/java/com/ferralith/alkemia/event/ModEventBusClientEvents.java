@@ -4,22 +4,23 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.client.*;
 import com.ferralith.alkemia.client.renderer.SketchingQuillSelectionRenderer;
 import com.ferralith.alkemia.entity.renderer.JarBlockEntityRenderer;
-import com.ferralith.alkemia.entity.renderer.MasterChalkboardRenderer;
-import com.ferralith.alkemia.entity.renderer.PartChalkboardRenderer;
+import com.ferralith.alkemia.entity.renderer.chalkboard.MasterChalkboardRenderer;
+import com.ferralith.alkemia.entity.renderer.chalkboard.PartChalkboardRenderer;
+import com.ferralith.alkemia.entity.renderer.ritualblock.RitualMasterBlockRenderer;
 import com.ferralith.alkemia.particle.ManaParticle;
 import com.ferralith.alkemia.registries.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 
 @EventBusSubscriber(modid = Alkemia.MODID, value = Dist.CLIENT)
 public class ModEventBusClientEvents {
@@ -36,6 +37,11 @@ public class ModEventBusClientEvents {
         event.registerBlockEntityRenderer(
                 ModBlockEntities.CHALKBOARD_PART_ENTITY.get(),
                 PartChalkboardRenderer::new
+        );
+
+        event.registerBlockEntityRenderer(
+                ModBlockEntities.MASTER_RITUAL_ENTITY.get(),
+                RitualMasterBlockRenderer::new
         );
     }
 
@@ -75,6 +81,11 @@ public class ModEventBusClientEvents {
         DrawHandler.handleDrawing();
     }
 
+//    @SubscribeEvent
+//    public static void onClick(InputEvent.MouseButton event) {
+//
+//    }
+
 
     @SubscribeEvent
     public static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
@@ -92,4 +103,5 @@ public class ModEventBusClientEvents {
                 ModItems.CHALK_ITEM.get()
         );
     }
+
 }

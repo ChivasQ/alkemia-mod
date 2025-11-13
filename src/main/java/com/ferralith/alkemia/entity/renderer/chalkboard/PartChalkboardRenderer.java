@@ -1,4 +1,4 @@
-package com.ferralith.alkemia.entity.renderer;
+package com.ferralith.alkemia.entity.renderer.chalkboard;
 
 import com.ferralith.alkemia.entity.chalkboard.ChalkboardPartEntity;
 import com.ferralith.alkemia.entity.chalkboard.MasterChalkboardEntity;

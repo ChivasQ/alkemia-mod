@@ -21,6 +21,9 @@ public class ModItems {
     // Creates a new food item with the id "alkemia:example_id", nutrition 1 and saturation 2
     public static final DeferredItem<BlockItem> CHALKBOARD_ITEM = ITEMS.registerSimpleBlockItem("chalkboard_item", ModBlocks.CHALKBOARD_BLOCK);
 
+    public static final DeferredItem<BlockItem> RITUAL_ITEM = ITEMS.registerSimpleBlockItem("ritual_item", ModBlocks.RITUAL_BLOCK);
+
+
     public static final DeferredItem<BlockItem> JAR_ITEM = ITEMS.registerSimpleBlockItem("jar_item", ModBlocks.JAR_BLOCK);
 
     public static final DeferredHolder<Item, BucketItem> MANA_BUCKET = ITEMS.register(

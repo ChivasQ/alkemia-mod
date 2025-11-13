@@ -4,6 +4,7 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.block.ChalkboardPartBlock;
 import com.ferralith.alkemia.block.JarBlock;
 import com.ferralith.alkemia.block.ManaCauldronBlock;
+import com.ferralith.alkemia.block.RitualBaseBlock;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -19,6 +20,8 @@ public class ModBlocks {
     public static final DeferredBlock<Block> EXAMPLE_BLOCK =
             BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of()
                     .mapColor(MapColor.STONE));
+
+
     public static final DeferredBlock<Block> JAR_BLOCK =
             BLOCKS.register(
                     "jar_block",
@@ -26,6 +29,10 @@ public class ModBlocks {
                             .noOcclusion()
                             .destroyTime(2)
                             .lightLevel(state -> state.getValue(JarBlock.LIGHT_LEVEL))));
+
+
+
+
     @SuppressWarnings("deprecation")
     public static final DeferredHolder<Block, AbstractCauldronBlock> COOL_LAVA_CAULDRON = BLOCKS.register(
             "mana_cauldron_block",
@@ -52,6 +59,11 @@ public class ModBlocks {
     public static final DeferredBlock<Block> CHALKBOARD_BLOCK = BLOCKS.register(
             "chalkboard_block",
             () -> new ChalkboardPartBlock(BlockBehaviour.Properties.of().strength(4).noCollission())
+    );
+
+    public static final DeferredBlock<Block> RITUAL_BLOCK = BLOCKS.register(
+            "ritual_block",
+            () -> new RitualBaseBlock(BlockBehaviour.Properties.of().strength(4))
     );
 
 

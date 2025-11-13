@@ -1,4 +1,4 @@
-package com.ferralith.alkemia.entity.renderer;
+package com.ferralith.alkemia.entity.renderer.chalkboard;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -10,9 +10,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.joml.Matrix4f;
-import org.joml.Vector2i;
-
-import java.util.Map;
 
 public abstract class BaseChalkboardRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
 

@@ -1,13 +1,10 @@
-package com.ferralith.alkemia.entity.renderer;
+package com.ferralith.alkemia.entity.renderer.chalkboard;
 
 import com.ferralith.alkemia.entity.chalkboard.MasterChalkboardEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import org.joml.Vector2i;
-
-import java.util.Map;
 
 public class MasterChalkboardRenderer extends BaseChalkboardRenderer<MasterChalkboardEntity> {
     public MasterChalkboardRenderer(BlockEntityRendererProvider.Context context) {
