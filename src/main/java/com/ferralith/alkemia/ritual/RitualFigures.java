@@ -20,6 +20,11 @@ public class RitualFigures {
         blockPos = pos;
     }
 
+    public RitualFigures(List<Vec3> nodes, List<Vector2i> ritualJoints) {
+        this.nodes = nodes;
+        this.joints = ritualJoints;
+    }
+
     public List<Vec3> getNodes() {
         return nodes;
     }
@@ -96,7 +101,7 @@ public class RitualFigures {
             nodeTag.putDouble("z", node.z);
             nodesTag.add(nodeTag);
         }
-        nbt.put("Nodes", nodesTag);
+        nbt.put("nodes", nodesTag);
 
         ListTag jointsTag = new ListTag();
         for (Vector2i joint : joints) {
@@ -105,7 +110,7 @@ public class RitualFigures {
             jointTag.putInt("n2", joint.y);
             jointsTag.add(jointTag);
         }
-        nbt.put("Joints", jointsTag);
+        nbt.put("joints", jointsTag);
 
         return nbt;
     }
@@ -114,7 +119,7 @@ public class RitualFigures {
         nodes.clear();
         joints.clear();
 
-        ListTag nodesTag = nbt.getList("Nodes", Tag.TAG_COMPOUND);
+        ListTag nodesTag = nbt.getList("nodes", Tag.TAG_COMPOUND);
         for (Tag tag : nodesTag) {
             CompoundTag nodeTag = (CompoundTag) tag;
             double x = nodeTag.getDouble("x");
@@ -123,7 +128,7 @@ public class RitualFigures {
             nodes.add(new Vec3(x, y, z));
         }
 
-        ListTag jointsTag = nbt.getList("Joints", Tag.TAG_COMPOUND);
+        ListTag jointsTag = nbt.getList("joints", Tag.TAG_COMPOUND);
         for (Tag tag : jointsTag) {
             CompoundTag jointTag = (CompoundTag) tag;
             int n1 = jointTag.getInt("n1");

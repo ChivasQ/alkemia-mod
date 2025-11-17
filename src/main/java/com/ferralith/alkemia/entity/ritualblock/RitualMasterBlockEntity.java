@@ -2,11 +2,13 @@ package com.ferralith.alkemia.entity.ritualblock;
 
 import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
+import com.ferralith.alkemia.ritual.NestedCirclesRecipe;
 import com.ferralith.alkemia.ritual.RitualFigures;
+import com.ferralith.alkemia.ritual.RitualRecipe;
+import com.ferralith.alkemia.ritual.SimpleRitualRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -19,8 +21,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector2i;
 
 import javax.annotation.Nullable;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static com.ferralith.alkemia.block.RitualBaseBlock.*;
@@ -56,6 +64,44 @@ public class RitualMasterBlockEntity extends BlockEntity {
 //                    node.y + this.worldPosition.getY()  + 1,
 //                    node.z + this.worldPosition.getZ()  + 0.5, 0, 0.2, 0);
 //        }
+    }
+
+
+
+
+    private static final List<RitualRecipe> RECIPES = Arrays.asList(
+//            new SimpleRitualRecipe(Arrays.asList(
+//                    new Vector2i(0, 4),
+//                    new Vector2i(4, 8),
+//                    new Vector2i(8, 0),
+//                    new Vector2i(2, 6),
+//                    new Vector2i(6, 10),
+//                    new Vector2i(10, 2)
+//            ), "Star Ritual"),
+//
+//            new SimpleRitualRecipe(Arrays.asList(
+//                    new Vector2i(0, 4),
+//                    new Vector2i(4, 8),
+//                    new Vector2i(8, 0)
+//            ), "Triangle Ritual"),
+
+            new NestedCirclesRecipe(Arrays.asList(12, 6), "Inner Circle (6 nodes)"),
+            new NestedCirclesRecipe(Arrays.asList(6, 3), "Nested Circles (6+3)")
+    );
+
+    public void checkForRitual() {
+        if (level.isClientSide()) return;
+
+        for (RitualRecipe recipe : RECIPES) {
+            if (recipe.matches(this.graph)) {
+                Minecraft.getInstance().player.sendSystemMessage(
+                        Component.literal("RITUAL ACTIVATED: " + recipe.getName())
+                );
+                return;
+            }
+        }
+
+        Minecraft.getInstance().player.sendSystemMessage(Component.literal("No valid ritual found"));
     }
 
 
@@ -118,7 +164,23 @@ public class RitualMasterBlockEntity extends BlockEntity {
         if (this.ritualID != null) {
             nbt.putUUID("ritual_id", this.ritualID);
         }
-        nbt.put("graph_data", graph.serializeNBT(registries));
+        CompoundTag tag = graph.serializeNBT(registries);
+        nbt.put("graph_data", tag);
+        saveNbtToFile(tag, "data.json");
+    }
+
+    public static void saveNbtToFile(CompoundTag nbtData, String fileName) {
+        File outputFile = new File(fileName);
+        String snbtString = nbtData.toString();
+        try (FileWriter writer = new FileWriter(outputFile)){
+
+            writer.write(snbtString);
+
+            System.out.println("NBT saved in: " + outputFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
