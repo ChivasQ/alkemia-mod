@@ -37,12 +37,15 @@ import static com.ferralith.alkemia.block.RitualBaseBlock.*;
 public class RitualMasterBlockEntity extends BlockEntity {
     private final RitualFigures graph;
     private int radius = 5;
+    private boolean isActive = false;
+    private int progress;
     @Nullable
     private UUID ritualID;
 
     public RitualMasterBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.MASTER_RITUAL_ENTITY.get(), pos, blockState);
         this.graph = new RitualFigures(pos.getBottomCenter().add(0,1,0), radius);
+        this.progress = 0;
     }
 
     public void setRitualID(UUID ritualID) {
@@ -55,35 +58,54 @@ public class RitualMasterBlockEntity extends BlockEntity {
         return this.ritualID;
     }
 
-    public void tick() {
-        if (Minecraft.getInstance().level == null) return;
+    public boolean isActive() {
+        return isActive;
+    }
 
-//        for (var node : graph.getNodes()) {
-//            Minecraft.getInstance().level.addParticle(ParticleTypes.FLAME,
-//                    node.x + this.worldPosition.getX() + 0.5,
-//                    node.y + this.worldPosition.getY()  + 1,
-//                    node.z + this.worldPosition.getZ()  + 0.5, 0, 0.2, 0);
-//        }
+    public int getProgress() {
+        return progress;
+    }
+
+    public void tick() {
+        if (this.getLevel() == null) return;
+
+        if (!level.isClientSide()) {
+            if (isActive) {
+                progress++;
+                if (progress > 100) {
+                    isActive = false;
+                }
+
+                setChanged();
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3); //FIXME: BAD SOLUTION
+            } else {
+                progress = Math.max(0, progress-5);
+                setChanged();
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+
     }
 
 
 
 
     private static final List<RitualRecipe> RECIPES = Arrays.asList(
-//            new SimpleRitualRecipe(Arrays.asList(
-//                    new Vector2i(0, 4),
-//                    new Vector2i(4, 8),
-//                    new Vector2i(8, 0),
-//                    new Vector2i(2, 6),
-//                    new Vector2i(6, 10),
-//                    new Vector2i(10, 2)
-//            ), "Star Ritual"),
-//
-//            new SimpleRitualRecipe(Arrays.asList(
-//                    new Vector2i(0, 4),
-//                    new Vector2i(4, 8),
-//                    new Vector2i(8, 0)
-//            ), "Triangle Ritual"),
+            new SimpleRitualRecipe(Arrays.asList(
+                    new Vector2i(0, 4),
+                    new Vector2i(4, 8),
+                    new Vector2i(8, 0),
+                    new Vector2i(2, 6),
+                    new Vector2i(6, 10),
+                    new Vector2i(10, 2)
+            ), "Star Ritual"),
+
+            new SimpleRitualRecipe(Arrays.asList(
+                    new Vector2i(0, 3),
+                    new Vector2i(3, 6),
+                    new Vector2i(6, 9),
+                    new Vector2i(9, 0)
+            ), "Multiblock structure"),
 
             new NestedCirclesRecipe(Arrays.asList(12, 6), "Inner Circle (6 nodes)"),
             new NestedCirclesRecipe(Arrays.asList(6, 3), "Nested Circles (6+3)")
@@ -91,17 +113,20 @@ public class RitualMasterBlockEntity extends BlockEntity {
 
     public void checkForRitual() {
         if (level.isClientSide()) return;
+        if (!isActive) {
+            for (RitualRecipe recipe : RECIPES) {
 
-        for (RitualRecipe recipe : RECIPES) {
-            if (recipe.matches(this.graph)) {
-                Minecraft.getInstance().player.sendSystemMessage(
-                        Component.literal("RITUAL ACTIVATED: " + recipe.getName())
-                );
-                return;
+                if (recipe.matches(this.graph)) {
+                    Minecraft.getInstance().player.sendSystemMessage(
+                            Component.literal("RITUAL ACTIVATED: " + recipe.getName())
+                    );
+                    isActive = true;
+                    return;
+                }
             }
-        }
 
-        Minecraft.getInstance().player.sendSystemMessage(Component.literal("No valid ritual found"));
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal("No valid ritual found"));
+        }
     }
 
 
@@ -161,6 +186,10 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.saveAdditional(nbt, registries);
+
+        nbt.putInt("progress", this.progress);
+        nbt.putBoolean("active", this.isActive);
+
         if (this.ritualID != null) {
             nbt.putUUID("ritual_id", this.ritualID);
         }
@@ -186,7 +215,8 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag nbt = super.getUpdateTag(registries);
-
+        nbt.putInt("progress", this.progress);
+        nbt.putBoolean("active", this.isActive);
         nbt.put("graph_data", graph.serializeNBT(registries));
         return nbt;
     }
@@ -195,7 +225,12 @@ public class RitualMasterBlockEntity extends BlockEntity {
     public void handleUpdateTag(CompoundTag nbt, HolderLookup.Provider registries) {
 
         super.handleUpdateTag(nbt, registries);
-
+        if (nbt.contains("progress")) {
+            this.progress = nbt.getInt("progress");
+        }
+        if (nbt.contains("active")) {
+            this.isActive = nbt.getBoolean("active");
+        }
         if (nbt.contains("graph_data", Tag.TAG_COMPOUND)) {
             graph.deserializeNBT(registries, nbt.getCompound("graph_data"));
         }
@@ -210,6 +245,9 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.loadAdditional(nbt, registries);
+        progress = nbt.getInt("progress");
+        isActive = nbt.getBoolean("active");
+
         if (nbt.hasUUID("ritual_id")) {
             this.ritualID = nbt.getUUID("ritual_id");
         }
