@@ -2,6 +2,7 @@ package com.ferralith.alkemia.entity.ritualblock;
 
 import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
+import com.ferralith.alkemia.registries.ModParticles;
 import com.ferralith.alkemia.ritual.NestedCirclesRecipe;
 import com.ferralith.alkemia.ritual.RitualFigures;
 import com.ferralith.alkemia.ritual.RitualRecipe;
@@ -9,6 +10,7 @@ import com.ferralith.alkemia.ritual.SimpleRitualRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -39,6 +41,7 @@ public class RitualMasterBlockEntity extends BlockEntity {
     private int radius = 5;
     private boolean isActive = false;
     private int progress;
+    private int cooktime = 0;
     @Nullable
     private UUID ritualID;
 
@@ -66,6 +69,10 @@ public class RitualMasterBlockEntity extends BlockEntity {
         return progress;
     }
 
+    public int getCooktime() {
+        return cooktime;
+    }
+
     public void tick() {
         if (this.getLevel() == null) return;
 
@@ -73,7 +80,12 @@ public class RitualMasterBlockEntity extends BlockEntity {
             if (isActive) {
                 progress++;
                 if (progress > 100) {
-                    isActive = false;
+                    cooktime++;
+                    progress--;
+                    if (cooktime > 200) {
+                        isActive = false;
+                        cooktime = 0;
+                    }
                 }
 
                 setChanged();
@@ -84,6 +96,7 @@ public class RitualMasterBlockEntity extends BlockEntity {
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         }
+
 
     }
 
@@ -186,7 +199,7 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.saveAdditional(nbt, registries);
-
+        nbt.putInt("cooktime", this.cooktime);
         nbt.putInt("progress", this.progress);
         nbt.putBoolean("active", this.isActive);
 
@@ -215,6 +228,7 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag nbt = super.getUpdateTag(registries);
+        nbt.putInt("cooktime", this.cooktime);
         nbt.putInt("progress", this.progress);
         nbt.putBoolean("active", this.isActive);
         nbt.put("graph_data", graph.serializeNBT(registries));
@@ -225,6 +239,10 @@ public class RitualMasterBlockEntity extends BlockEntity {
     public void handleUpdateTag(CompoundTag nbt, HolderLookup.Provider registries) {
 
         super.handleUpdateTag(nbt, registries);
+        if (nbt.contains("cooktime")) {
+            this.cooktime = nbt.getInt("cooktime");
+        }
+
         if (nbt.contains("progress")) {
             this.progress = nbt.getInt("progress");
         }
@@ -245,6 +263,7 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.loadAdditional(nbt, registries);
+        cooktime = nbt.getInt("cooktime");
         progress = nbt.getInt("progress");
         isActive = nbt.getBoolean("active");
 

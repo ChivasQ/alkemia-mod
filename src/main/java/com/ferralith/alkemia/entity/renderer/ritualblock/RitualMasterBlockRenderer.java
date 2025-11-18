@@ -2,13 +2,18 @@ package com.ferralith.alkemia.entity.renderer.ritualblock;
 
 import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.entity.ritualblock.RitualMasterBlockEntity;
+import com.ferralith.alkemia.particle.ManaParticle;
+import com.ferralith.alkemia.registries.ModParticles;
 import com.ferralith.alkemia.ritual.RitualFigures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -32,7 +37,6 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
     public AABB getRenderBoundingBox(RitualMasterBlockEntity blockEntity) {
         int radius = blockEntity.getRadius();
         Vec3 pos = blockEntity.getBlockPos().getBottomCenter();
-        // Расширяем bounding box, чтобы свечение было видно
         return new AABB(pos.add(-radius, -radius, -radius), pos.add(radius, radius * 2, radius));
     }
 
@@ -78,25 +82,31 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
             float glowHeight = currentProgress * GLOW_HEIGHT_SCALE;
 
             glowHeight = Math.min(glowHeight, 100 * GLOW_HEIGHT_SCALE);
-
+            float alpha = 0.7f * (currentProgress/100);
             for (var conn : graph.getJoints()) {
                 Vec3 p1 = graph.getNode(conn.x);
                 Vec3 p2 = graph.getNode(conn.y);
+                p1.distanceTo(p2);
                 poseStack.pushPose();
                 poseStack.translate(0.5, 1.01, 0.5);
 
                 drawQuad(glowConsumer, poseStack,
                         (float) p1.x, (float) p1.y, (float) p1.z,
-                        (float) p2.x, (float) p2.y+glowHeight, (float) p2.z, 0, 0, 1,1, packedLight, overlay);
+                        (float) p2.x, (float) p2.y+glowHeight, (float) p2.z,
+                        (float) 0, 1-currentProgress/100,
+                        (float) p1.distanceTo(p2)/2.56f,1f,
+                        0xF000F0,
+                        OverlayTexture.NO_OVERLAY,
+                        alpha);
                 poseStack.popPose();
             }
         }
     }
 
     private void drawVertex(VertexConsumer buffer, PoseStack poseStack,
-                            float x, float y, float z, float u, float v, int light, int overlay) {
+                            float x, float y, float z, float u, float v, int light, int overlay, float alpha) {
         buffer.addVertex(poseStack.last().pose(), x, y, z)
-                .setColor(0f, 1f, 1f, 0.7f)
+                .setColor(0f, 1f, 1f, alpha)
                 .setUv(u, v)
                 .setLight(light)
                 .setOverlay(overlay)
@@ -105,11 +115,11 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
 
     private void drawQuad(VertexConsumer builder, PoseStack poseStack,
                           float x0, float y0, float z0,
-                          float x1, float y1, float z1, float u0, float v0, float u1, float v1, int light, int overlay) {
-        drawVertex(builder, poseStack, x1, y0, z1, u0, v0, light, overlay);
-        drawVertex(builder, poseStack, x1, y1, z1, u0, v1, light, overlay);
-        drawVertex(builder, poseStack, x0, y1, z0, u1, v1, light, overlay);
-        drawVertex(builder, poseStack, x0, y0, z0, u1, v0, light, overlay);
+                          float x1, float y1, float z1, float u0, float v0, float u1, float v1, int light, int overlay, float alpha) {
+        drawVertex(builder, poseStack, x1, y0, z1, u0, v0, light, overlay, alpha);
+        drawVertex(builder, poseStack, x1, y1, z1, u0, v1, light, overlay, alpha);
+        drawVertex(builder, poseStack, x0, y1, z0, u1, v1, light, overlay, alpha);
+        drawVertex(builder, poseStack, x0, y0, z0, u1, v0, light, overlay, alpha);
 
 
     }
