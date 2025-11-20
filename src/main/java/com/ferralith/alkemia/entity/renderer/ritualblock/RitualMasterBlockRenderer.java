@@ -25,7 +25,7 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
     private static final float GLOW_HEIGHT_SCALE = 0.02f;
     private static final Vector4f GLOW_COLOR = new Vector4f(0.8f, 0.2f, 1.0f, 0.7f);
     private static final ResourceLocation ACTIVE = ResourceLocation.fromNamespaceAndPath(Alkemia.MODID, "textures/ritual/active.png");
-    private static final RenderType BEAM_RENDER_TYPE = RenderType.entityTranslucentEmissive(ACTIVE, false);
+    private static final RenderType BEAM_RENDER_TYPE = RenderType.entityTranslucentEmissive(ACTIVE, true);
 
 
     @Override

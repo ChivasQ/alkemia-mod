@@ -51,7 +51,6 @@ public abstract class ManaFluid extends FlowingFluid {
         return false;
     }
 
-
     @Override
     public boolean isSource(FluidState fluidState) {
         return false;

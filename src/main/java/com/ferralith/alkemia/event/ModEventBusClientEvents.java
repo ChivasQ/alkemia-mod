@@ -7,6 +7,7 @@ import com.ferralith.alkemia.entity.renderer.JarBlockEntityRenderer;
 import com.ferralith.alkemia.entity.renderer.chalkboard.MasterChalkboardRenderer;
 import com.ferralith.alkemia.entity.renderer.chalkboard.PartChalkboardRenderer;
 import com.ferralith.alkemia.entity.renderer.ritualblock.RitualMasterBlockRenderer;
+import com.ferralith.alkemia.item.curios.CloakModel;
 import com.ferralith.alkemia.particle.ManaParticle;
 import com.ferralith.alkemia.registries.*;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -102,6 +103,11 @@ public class ModEventBusClientEvents {
                 },
                 ModItems.CHALK_ITEM.get()
         );
+    }
+
+    @SubscribeEvent
+    public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(ModModelLayers.CAPE_LAYER, CloakModel::createBodyLayer);
     }
 
 }

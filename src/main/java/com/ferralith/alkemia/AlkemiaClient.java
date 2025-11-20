@@ -35,6 +35,7 @@ public class AlkemiaClient {
     }
 
     static void curioSetup() {
+
         CuriosRendererRegistry.register(ModItems.CLOAK_ITEM.get(), CloakRenderer::new);
     }
 }
