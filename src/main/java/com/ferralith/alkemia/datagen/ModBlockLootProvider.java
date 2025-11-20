@@ -20,6 +20,9 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.EXAMPLE_BLOCK.get());
         dropSelf(ModBlocks.JAR_BLOCK.get());
         dropSelf(ModBlocks.COOL_LAVA_CAULDRON.get());
+        dropSelf(ModBlocks.CHALKBOARD_BLOCK.get());
+        dropSelf(ModBlocks.RITUAL_BLOCK.get());
+
         //see BlockLootSubProvider.java for more examples of drops
     }
 

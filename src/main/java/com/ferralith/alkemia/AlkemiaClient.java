@@ -1,5 +1,7 @@
 package com.ferralith.alkemia;
 
+import com.ferralith.alkemia.item.curios.CloakRenderer;
+import com.ferralith.alkemia.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -9,6 +11,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Alkemia.MODID, dist = Dist.CLIENT)
@@ -27,5 +30,11 @@ public class AlkemiaClient {
         // Some client setup code
         Alkemia.LOGGER.info("HELLO FROM CLIENT SETUP");
         Alkemia.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+
+        curioSetup();
+    }
+
+    static void curioSetup() {
+        CuriosRendererRegistry.register(ModItems.CLOAK_ITEM.get(), CloakRenderer::new);
     }
 }

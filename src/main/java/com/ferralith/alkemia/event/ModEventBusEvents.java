@@ -21,6 +21,9 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import top.theillusivec4.curios.api.CuriosCapability;
+import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.type.capability.ICurio;
 
 public class ModEventBusEvents {
     @SubscribeEvent
@@ -40,6 +43,17 @@ public class ModEventBusEvents {
                 ),
                 ModItems.JAR_ITEM.get()
         );
+        event.registerItem(
+                CuriosCapability.ITEM,
+                (stack, context) -> new ICurio() {
+                    @Override
+                    public ItemStack getStack() {
+                        return stack;
+                    }
+                },
+                ModItems.CLOAK_ITEM
+        );
+
     }
 
     @SubscribeEvent

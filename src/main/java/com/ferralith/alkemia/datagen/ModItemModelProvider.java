@@ -19,6 +19,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 //        withExistingParent("jar_item", this.mcLoc("builtin/entity"));
         basicItem(ModItems.MANA_BUCKET.get());
         basicItem(ModItems.SKETCHING_QUILL.get());
+        basicItem(ModItems.CLOAK_ITEM.get());
     }
 
     public ItemModelBuilder blockItem(String name, ResourceLocation resourceLocation) {
