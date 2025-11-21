@@ -1,12 +1,11 @@
 package com.ferralith.alkemia.entity.ritualblock;
 
+import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.registries.ModParticles;
-import com.ferralith.alkemia.ritual.NestedCirclesRecipe;
-import com.ferralith.alkemia.ritual.RitualFigures;
-import com.ferralith.alkemia.ritual.RitualRecipe;
-import com.ferralith.alkemia.ritual.SimpleRitualRecipe;
+import com.ferralith.alkemia.ritual.*;
+import com.ferralith.alkemia.ritual.data.RitualSavingManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -17,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -127,6 +128,16 @@ public class RitualMasterBlockEntity extends BlockEntity {
     public void checkForRitual() {
         if (level.isClientSide()) return;
         if (!isActive) {
+            RitualFigures ritualFigures = RitualSavingManager.loadRitualFromResources("/assets/alkemia/textures/ritual/huh.json");
+
+            if (RitualRecipeMatcher.match(this.graph, ritualFigures)) {
+                Minecraft.getInstance().player.sendSystemMessage(
+                        Component.literal("RITUAL ACTIVATED: !!")
+                );
+                isActive = true;
+                return;
+            }
+
             for (RitualRecipe recipe : RECIPES) {
 
                 if (recipe.matches(this.graph)) {

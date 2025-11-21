@@ -1,10 +1,14 @@
 package com.ferralith.alkemia.ritual.data;
 
+import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.ritual.RitualFigures;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,5 +34,24 @@ public class RitualSavingManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static RitualFigures loadRitualFromResources(String resourcePath) {
+
+        try (InputStream stream = Alkemia.class.getResourceAsStream(resourcePath)) {
+
+            if (stream == null) {
+                System.err.println("File not found: " + resourcePath);
+                return null;
+            }
+            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                RitualTemplateData ritualTemplateData = GSON.fromJson(reader, RitualTemplateData.class);
+                return ritualTemplateData.toRitualFigures();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
