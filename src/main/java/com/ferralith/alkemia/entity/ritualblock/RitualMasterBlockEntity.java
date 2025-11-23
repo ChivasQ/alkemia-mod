@@ -4,27 +4,40 @@ import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.ritual.*;
 import com.ferralith.alkemia.ritual.data.RitualJsonScraper;
+import com.ferralith.alkemia.ritual.data.RitualRecipeData;
+import com.ferralith.alkemia.ritual.data.RitualRecipeManager;
+import com.google.gson.Gson;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Interaction;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.joml.Vector2i;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -123,31 +136,24 @@ public class RitualMasterBlockEntity extends BlockEntity {
     public void checkForRitual() {
         if (level.isClientSide()) return;
 
-        RitualJsonScraper.scrapFileNames(this.level.getServer().getResourceManager());
-
         if (!isActive) {
-            RitualFigures ritualFigures = RitualJsonScraper.loadRitualFromResources("/data/alkemia/ritual/recipe/huh.json");
+//            isActive = true;
+            RitualRecipeData recipe = RitualRecipeManager.findMatchingRecipe(this.graph);
+            if (recipe == null) return;
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(recipe.template));
 
-            if (RitualRecipeMatcher.match(this.graph, ritualFigures)) {
-                Minecraft.getInstance().player.sendSystemMessage(
-                        Component.literal("RITUAL ACTIVATED: !!")
-                );
-                isActive = true;
-                return;
+            if (recipe.results.getFirst().type == RitualRecipeData.RecipeType.CRAFT) {
+                System.out.println(recipe.results.getFirst().data);
+                String item_str = recipe.results.getFirst().data.getAsString();
+                ResourceLocation item_loc = ResourceLocation.parse(item_str);
+                Item item = BuiltInRegistries.ITEM.get(item_loc);
+                Entity item_entity = new ItemEntity(level,
+                        this.worldPosition.getX(),
+                        this.worldPosition.getY()+2,
+                        this.worldPosition.getZ(),
+                        item.getDefaultInstance());
+                level.addFreshEntity(item_entity);
             }
-
-            for (RitualRecipe recipe : RECIPES) {
-
-                if (recipe.matches(this.graph)) {
-                    Minecraft.getInstance().player.sendSystemMessage(
-                            Component.literal("RITUAL ACTIVATED: " + recipe.getName())
-                    );
-                    isActive = true;
-                    return;
-                }
-            }
-
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("No valid ritual found"));
         }
     }
 

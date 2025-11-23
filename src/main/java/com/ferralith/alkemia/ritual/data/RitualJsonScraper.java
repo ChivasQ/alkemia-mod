@@ -12,11 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +25,8 @@ public class RitualJsonScraper {
 
 
 
-    public static List<String> scrapFileNames(ResourceManager resourceManager) {
-        Map<ResourceLocation, Resource> resources = resourceManager.listResources("ritual",
+    public static List<String> scrapRecipes(ResourceManager resourceManager) {
+        Map<ResourceLocation, Resource> resources = resourceManager.listResources("ritual/recipe",
                 location -> location.getNamespace().equals("alkemia") && location.getPath().endsWith(".json")
         );
 
@@ -45,12 +43,38 @@ public class RitualJsonScraper {
         return null;
     }
 
+    public static void saveRecipeToFile(RitualRecipeData data, Path filePath) {
+        try {
+            String jsonString = GSON.toJson(data);
 
+            Files.createDirectories(filePath.getParent());
 
+            Files.writeString(filePath, jsonString, StandardCharsets.UTF_8);
 
+            System.out.println("Recipe saved to: " + filePath);
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public static RitualRecipeData loadRecipeFromResources(String resourcePath) {
 
+        try (InputStream stream = Alkemia.class.getResourceAsStream(resourcePath)) {
+
+            if (stream == null) {
+                System.err.println("File not found: " + resourcePath);
+                return null;
+            }
+            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                return GSON.fromJson(reader, RitualRecipeData.class);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public static void saveRitualToFile(RitualFigures graph, Path filePath) {
 
