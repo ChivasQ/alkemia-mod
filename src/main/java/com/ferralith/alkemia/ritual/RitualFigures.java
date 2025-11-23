@@ -55,8 +55,7 @@ public class RitualFigures {
         joints.add(new Vector2i(nodeInd1, nodeInd2));
         Vec3 node1 = nodes.get(nodeInd1);
         Vec3 node2 = nodes.get(nodeInd2);
-        System.out.println(node1);
-        System.out.println(node2);
+
         Vec3 node = new Vec3(
                 (node1.x + node2.x) / 2,
                 (node1.y + node2.y) / 2,

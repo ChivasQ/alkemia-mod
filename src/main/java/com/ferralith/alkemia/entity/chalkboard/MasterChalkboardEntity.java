@@ -168,11 +168,9 @@ public class MasterChalkboardEntity extends BlockEntity {
         pixels.clear();
 
         for (String key : tag.getAllKeys()) {
-            System.out.println("tag " + key);
             if (key.startsWith("data_")) {
                 long posLong = Long.parseLong(key.substring(5));
                 BlockPos pos = BlockPos.of(posLong);
-                System.out.println(pos);
                 byte[] pixelData = tag.getByteArray(key);
 
                 byte[][] colorArr = new byte[16][16];

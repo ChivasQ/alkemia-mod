@@ -11,7 +11,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 public class ModNeoForgeEvents {
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        System.out.println("entity interact");
         RitualDrawHandler.handle(event);
     }
 

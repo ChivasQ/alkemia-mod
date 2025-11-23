@@ -24,7 +24,7 @@ public class SimpleRitualRecipe implements RitualRecipe{
     public boolean matches(RitualFigures playerGraph) {
         //if nodes more than n
         List<Vector2i> joints = copyOf(playerGraph.getJoints());
-        System.out.println(joints);
+
         List<Vector2i> out = new ArrayList<>();
         for (int i = 12; i < joints.size(); i++) {
             out.add(joints.get(i));

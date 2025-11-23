@@ -40,7 +40,6 @@ public class RitualDrawHandler {
                 if (be instanceof RitualMasterBlockEntity master) {
 
                     master.onNodeClicked(player, nodeIndex);
-                    System.out.println("node!");
                     event.setCancellationResult(InteractionResult.SUCCESS);
                     event.setCanceled(true);
                 }

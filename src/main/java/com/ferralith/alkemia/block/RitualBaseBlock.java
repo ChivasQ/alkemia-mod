@@ -57,7 +57,6 @@ public class RitualBaseBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.isClientSide()) return super.useWithoutItem(state, level, pos, player, hitResult);
-        System.out.println("use");
         if (level.getBlockEntity(pos) instanceof RitualMasterBlockEntity blockEntity) {
             blockEntity.checkForRitual();
         }
@@ -70,7 +69,6 @@ public class RitualBaseBlock extends BaseEntityBlock {
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        System.out.println("setPlacedBy");
         if (level.isClientSide()) {
             return;
         }

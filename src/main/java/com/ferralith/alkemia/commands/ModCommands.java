@@ -3,11 +3,10 @@ package com.ferralith.alkemia.commands;
 import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.entity.ritualblock.RitualMasterBlockEntity;
 import com.ferralith.alkemia.ritual.RitualFigures;
-import com.ferralith.alkemia.ritual.data.RitualSavingManager;
+import com.ferralith.alkemia.ritual.data.RitualJsonScraper;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -63,7 +62,7 @@ public class ModCommands {
                         .resolve("generated_rituals")
                         .resolve(ritualName + ".json");
 
-                RitualSavingManager.saveRitualToFile(graph, savePath);
+                RitualJsonScraper.saveRitualToFile(graph, savePath);
 
                 source.sendSuccess(() ->
                                 Component.literal("Ritual '" + ritualName + "' saved!"),

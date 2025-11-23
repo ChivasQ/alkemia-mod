@@ -4,19 +4,53 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.ritual.RitualFigures;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 
-public class RitualSavingManager {
+public class RitualJsonScraper {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .create();
+
+
+
+    public static List<String> scrapFileNames(ResourceManager resourceManager) {
+        Map<ResourceLocation, Resource> resources = resourceManager.listResources("ritual",
+                location -> location.getNamespace().equals("alkemia") && location.getPath().endsWith(".json")
+        );
+
+        for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
+            ResourceLocation id = entry.getKey();
+            Resource resource = entry.getValue();
+
+            try (var reader = resource.openAsReader()) {
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+
+
+
+
+
+
 
     public static void saveRitualToFile(RitualFigures graph, Path filePath) {
 

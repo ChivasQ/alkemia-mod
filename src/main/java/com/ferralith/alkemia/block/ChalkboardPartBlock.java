@@ -142,7 +142,6 @@ public class ChalkboardPartBlock extends BaseEntityBlock {
                 be = new ChalkboardPartEntity(pos, newState);
                 ((ChalkboardPartEntity) be).setMaster(masterPos);
                 level.setBlockEntity(be);
-                System.out.println(level.isClientSide());
                 level.sendBlockUpdated(pos, state.setValue(MASTER, false), newState, Block.UPDATE_ALL_IMMEDIATE);
 
             }

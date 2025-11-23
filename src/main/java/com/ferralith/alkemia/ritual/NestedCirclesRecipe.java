@@ -22,13 +22,11 @@ public class NestedCirclesRecipe implements RitualRecipe{
     @Override
     public boolean matches(RitualFigures graph) {
         Map<Integer, List<Integer>> adj = buildAdjacencyList(graph.joints);
-        System.out.println(adj);
         Set<Integer> allNodes = new HashSet<>();
         adj.forEach((node, neighbors) -> {
             allNodes.add(node);
             allNodes.addAll(neighbors);
         });
-        System.out.println(adj);
         Set<Integer> visitedNodes = new HashSet<>();
         List<Integer> foundCycleSizes = new ArrayList<>();
         for (int node : allNodes) {
@@ -36,7 +34,6 @@ public class NestedCirclesRecipe implements RitualRecipe{
                 List<Integer> componentNodes = new ArrayList<>();
                 findConnectedComponent(node, adj, visitedNodes, componentNodes);
 
-                System.out.println(componentNodes);
                 if (isPerfectCycle(componentNodes, graph.joints)) {
                     foundCycleSizes.add(componentNodes.size());
                 } else {

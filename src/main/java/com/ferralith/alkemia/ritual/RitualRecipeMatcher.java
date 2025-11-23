@@ -73,7 +73,7 @@ public class RitualRecipeMatcher {
         return true;
     }
 
-    private static Map<Integer, Integer> countDegrees(Map<Integer, List<Integer>> adj) {
+    private static Map<Integer, Integer> countDegrees(Map<Integer, List<Integer>> adj) { //TODO: to create signatures for rituals in order to reduce the number of checks
         Map<Integer, Integer> degreeCounts = new HashMap<>();
         for (List<Integer> neighbors : adj.values()) {
             int degree = neighbors.size();

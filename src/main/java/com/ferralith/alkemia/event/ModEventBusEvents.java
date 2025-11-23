@@ -75,7 +75,7 @@ public class ModEventBusEvents {
             for (DyeColor color : DyeColor.values()) {
                 ItemStack coloredChalk = ModItems.CHALK_ITEM.get().getDefaultInstance();
                 coloredChalk.set(ModDataComponents.COLOR, (byte) color.getId());
-                System.out.println("color id:" + (byte) color.getId());
+
                 event.accept(coloredChalk);
             }
         }

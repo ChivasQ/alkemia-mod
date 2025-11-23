@@ -18,7 +18,7 @@ public class S2C_ChalkboardPixelsDataPayloadHandler {
             Player player = context.player();
             Level level = player.level();
             if (!level.isClientSide()) return;
-            System.out.println("client");
+
             BlockPos masterPos = data.pos();
 
             if (level.isLoaded(masterPos)) {
