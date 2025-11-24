@@ -1,7 +1,7 @@
 package com.ferralith.alkemia.registries;
 
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.entity.ritualblock.PlayerSelection;
+import com.ferralith.alkemia.client.PlayerSelection;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;

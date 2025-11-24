@@ -20,6 +20,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.MANA_BUCKET.get());
         basicItem(ModItems.SKETCHING_QUILL.get());
         basicItem(ModItems.CLOAK_ITEM.get());
+        blockItem("pedestal_item", modLoc("block/pedestal"));
     }
 
     public ItemModelBuilder blockItem(String name, ResourceLocation resourceLocation) {

@@ -4,6 +4,7 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.client.*;
 import com.ferralith.alkemia.client.renderer.SketchingQuillSelectionRenderer;
 import com.ferralith.alkemia.entity.renderer.JarBlockEntityRenderer;
+import com.ferralith.alkemia.entity.renderer.PedestalBlockEntityRenderer;
 import com.ferralith.alkemia.entity.renderer.chalkboard.MasterChalkboardRenderer;
 import com.ferralith.alkemia.entity.renderer.chalkboard.PartChalkboardRenderer;
 import com.ferralith.alkemia.entity.renderer.ritualblock.RitualMasterBlockRenderer;
@@ -43,6 +44,11 @@ public class ModEventBusClientEvents {
         event.registerBlockEntityRenderer(
                 ModBlockEntities.MASTER_RITUAL_ENTITY.get(),
                 RitualMasterBlockRenderer::new
+        );
+
+        event.registerBlockEntityRenderer(
+                ModBlockEntities.PEDESTAL_BLOCK_ENTITY.get(),
+                PedestalBlockEntityRenderer::new
         );
     }
 

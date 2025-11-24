@@ -1,12 +1,12 @@
 package com.ferralith.alkemia.entity.ritualblock;
 
+import com.ferralith.alkemia.client.PlayerSelection;
+import com.ferralith.alkemia.mixin.InteractionAccessor;
 import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.ritual.*;
-import com.ferralith.alkemia.ritual.data.RitualJsonScraper;
 import com.ferralith.alkemia.ritual.data.RitualRecipeData;
 import com.ferralith.alkemia.ritual.data.RitualRecipeManager;
-import com.google.gson.Gson;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -26,18 +26,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.joml.Vector2i;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -109,30 +104,6 @@ public class RitualMasterBlockEntity extends BlockEntity {
 
     }
 
-
-
-
-    private static final List<RitualRecipe> RECIPES = Arrays.asList(
-            new SimpleRitualRecipe(Arrays.asList(
-                    new Vector2i(0, 4),
-                    new Vector2i(4, 8),
-                    new Vector2i(8, 0),
-                    new Vector2i(2, 6),
-                    new Vector2i(6, 10),
-                    new Vector2i(10, 2)
-            ), "Star Ritual"),
-
-            new SimpleRitualRecipe(Arrays.asList(
-                    new Vector2i(0, 3),
-                    new Vector2i(3, 6),
-                    new Vector2i(6, 9),
-                    new Vector2i(9, 0)
-            ), "Multiblock structure"),
-
-            new NestedCirclesRecipe(Arrays.asList(12, 6), "Inner Circle (6 nodes)"),
-            new NestedCirclesRecipe(Arrays.asList(6, 3), "Nested Circles (6+3)")
-    );
-
     public void checkForRitual() {
         if (level.isClientSide()) return;
 
@@ -189,24 +160,28 @@ public class RitualMasterBlockEntity extends BlockEntity {
             Vec3 centerPos = graph.blockPos;
             Vec3 newNode = graph.connectNodes(firstIndex, secondIndex);
 
-            Interaction interaction = new Interaction(EntityType.INTERACTION, level);
-            interaction.setCustomNameVisible(true);
-
-            interaction.setPos(centerPos.x + newNode.x, centerPos.y + newNode.y, centerPos.z + newNode.z);
-
-            interaction.setBoundingBox(interaction.getBoundingBox().inflate(0.5));
-            interaction.setCustomName(Component.literal("node" + i));
-
-            interaction.getPersistentData().putUUID(RITUAL_MASTER_TAG, ritualID);
-            interaction.getPersistentData().putInt(RITUAL_NODE_INDEX_TAG, i);
-            interaction.getPersistentData().putLong(RITUAL_MATER_POS, this.worldPosition.asLong());
-
-            level.addFreshEntity(interaction);
+            spawnInteractionEntity(centerPos, newNode, i);
 
 
             setChanged();
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+    }
+
+    public void spawnInteractionEntity(Vec3 centerPos, Vec3 newNode, int i) {
+        Interaction interaction = new Interaction(EntityType.INTERACTION, level);
+        interaction.setCustomNameVisible(true);
+
+        interaction.setPos(centerPos.x + newNode.x, centerPos.y + newNode.y, centerPos.z + newNode.z);
+        ((InteractionAccessor) interaction).invokeSetWidth(0.5f);
+        ((InteractionAccessor) interaction).invokeSetHeight(0.25f);
+        interaction.setCustomName(Component.literal("node" + i));
+
+        interaction.getPersistentData().putUUID(RITUAL_MASTER_TAG, ritualID);
+        interaction.getPersistentData().putInt(RITUAL_NODE_INDEX_TAG, i);
+        interaction.getPersistentData().putLong(RITUAL_MATER_POS, this.worldPosition.asLong());
+
+        level.addFreshEntity(interaction);
     }
 
     @Override

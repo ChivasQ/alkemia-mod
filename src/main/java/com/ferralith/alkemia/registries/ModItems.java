@@ -21,6 +21,7 @@ public class ModItems {
     public static final DeferredItem<BlockItem> CHALKBOARD_ITEM = ITEMS.registerSimpleBlockItem("chalkboard_item", ModBlocks.CHALKBOARD_BLOCK);
     public static final DeferredItem<BlockItem> RITUAL_ITEM = ITEMS.registerSimpleBlockItem("ritual_item", ModBlocks.RITUAL_BLOCK);
     public static final DeferredItem<BlockItem> JAR_ITEM = ITEMS.registerSimpleBlockItem("jar_item", ModBlocks.JAR_BLOCK);
+    public static final DeferredItem<BlockItem> PEDESTAL_ITEM = ITEMS.registerSimpleBlockItem("pedestal_item", ModBlocks.PEDESTAL);
     public static final DeferredHolder<Item, BucketItem> MANA_BUCKET = ITEMS.register("mana_bucket", () -> new BucketItem(ModFluids.SOURCE_MANA.get(), new Item.Properties()));
     public static final DeferredItem<Item> SKETCHING_QUILL = ITEMS.register("sketching_quill", () -> new SketchingQuillItem(new Item.Properties()));
     public static final DeferredItem<Item> CHALK_ITEM = ITEMS.register("chalk", () ->  new ChalkItem(new Item.Properties().stacksTo(1).durability(100)));

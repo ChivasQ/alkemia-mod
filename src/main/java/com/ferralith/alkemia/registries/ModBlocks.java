@@ -1,10 +1,7 @@
 package com.ferralith.alkemia.registries;
 
 import com.ferralith.alkemia.Alkemia;
-import com.ferralith.alkemia.block.ChalkboardPartBlock;
-import com.ferralith.alkemia.block.JarBlock;
-import com.ferralith.alkemia.block.ManaCauldronBlock;
-import com.ferralith.alkemia.block.RitualBaseBlock;
+import com.ferralith.alkemia.block.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -55,6 +52,12 @@ public class ModBlocks {
                             .sound(SoundType.EMPTY)
             )
     );
+
+    public static final DeferredBlock<Block> PEDESTAL = BLOCKS.register(
+            "pedestal",
+            () -> new PedestaBlock(BlockBehaviour.Properties.of().strength(4))
+    );
+
 
     public static final DeferredBlock<Block> CHALKBOARD_BLOCK = BLOCKS.register(
             "chalkboard_block",

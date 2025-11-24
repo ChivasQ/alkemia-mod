@@ -1,12 +1,6 @@
-package com.ferralith.alkemia.entity.ritualblock;
+package com.ferralith.alkemia.client;
 
-import com.ferralith.alkemia.block.ChalkboardPartBlock;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.capabilities.EntityCapability;
 import org.jetbrains.annotations.Nullable;
 
 public class PlayerSelection {

@@ -1,6 +1,7 @@
 package com.ferralith.alkemia.block;
 
 import com.ferralith.alkemia.entity.ritualblock.RitualMasterBlockEntity;
+import com.ferralith.alkemia.mixin.InteractionAccessor;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -83,20 +84,7 @@ public class RitualBaseBlock extends BaseEntityBlock {
             for (int i = 0; i < nodes.size(); i++) {
                 Vec3 nodePos = nodes.get(i);
 
-                Interaction interaction = new Interaction(EntityType.INTERACTION, level);
-                interaction.setCustomNameVisible(true);
-
-                interaction.setPos(centerPos.x + nodePos.x, centerPos.y + nodePos.y, centerPos.z + nodePos.z);
-                System.out.println(interaction.getBoundingBox());
-                System.out.println(interaction.getPosition(1));
-                interaction.setBoundingBox(interaction.getBoundingBox().inflate(0.5));
-                interaction.setCustomName(Component.literal("node" + i));
-
-                interaction.getPersistentData().putUUID(RITUAL_MASTER_TAG, ritualID);
-                interaction.getPersistentData().putInt(RITUAL_NODE_INDEX_TAG, i);
-                interaction.getPersistentData().putLong(RITUAL_MATER_POS, pos.asLong());
-
-                level.addFreshEntity(interaction);
+                master.spawnInteractionEntity(centerPos, nodePos, i);
             }
         }
     }
