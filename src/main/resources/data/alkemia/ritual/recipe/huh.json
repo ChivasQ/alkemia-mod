@@ -4,16 +4,28 @@
   "tier": 0,
   "duration": 0,
   "mana_cost": 0,
+  "main_item": {
+    "item": "minecraft:diamond",
+    "count": 1
+  },
   "item_inputs": [
     {
-      "item": "minecraft:diamond",
+      "item": "minecraft:diamond_block",
+      "count": 1
+    },
+    {
+      "item": "minecraft:diamond_block",
+      "count": 1
+    },
+    {
+      "item": "minecraft:diamond_block",
       "count": 1
     }
   ],
   "results": [
     {
       "type": "CRAFT",
-      "data": "minecraft:diamond_block"
+      "data": "minecraft:stick"
     }
   ]
 }

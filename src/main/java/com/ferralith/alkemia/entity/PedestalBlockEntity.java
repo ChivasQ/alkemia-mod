@@ -5,6 +5,9 @@ import com.ferralith.alkemia.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.items.ItemStackHandler;
+
+import javax.annotation.Nullable;
 
 public class PedestalBlockEntity extends BlockEntity {
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
@@ -31,6 +36,7 @@ public class PedestalBlockEntity extends BlockEntity {
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
             }
         }
+
     };
 
     public PedestalBlockEntity(BlockPos pos, BlockState blockState) {
@@ -65,10 +71,31 @@ public class PedestalBlockEntity extends BlockEntity {
     private float rotation;
     @OnlyIn(Dist.CLIENT)
     public float getRenderingRotation(float partialTick) {
-        rotation += 0.5f;
+        rotation += partialTick;
         if (rotation >= 360) {
             rotation = 0;
         }
         return rotation;
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag nbt = super.getUpdateTag(registries);
+        nbt.put("inventory", inventory.serializeNBT(registries));
+        return nbt;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.handleUpdateTag(nbt, registries);
+        if (nbt.contains("inventory")) {
+            inventory.deserializeNBT(registries, nbt.getCompound("inventory"));
+        }
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }

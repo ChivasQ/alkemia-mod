@@ -1,0 +1,41 @@
+{
+  "template": "alkemia:huh",
+  "color": 0,
+  "tier": 0,
+  "duration": 0,
+  "mana_cost": 0,
+  "main_item": {
+  },
+  "item_inputs": [
+    {
+      "item": "minecraft:red_wool",
+      "count": 1
+    },
+    {
+      "item": "minecraft:red_wool",
+      "count": 1
+    },
+    {
+      "item": "minecraft:red_wool",
+      "count": 1
+    },
+    {
+      "item": "minecraft:string",
+      "count": 1
+    },
+    {
+      "item": "minecraft:string",
+      "count": 1
+    },
+    {
+      "item": "minecraft:string",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "type": "CRAFT",
+      "data": "alkemia:cloak"
+    }
+  ]
+}

@@ -1,12 +1,14 @@
 package com.ferralith.alkemia.entity.ritualblock;
 
 import com.ferralith.alkemia.client.PlayerSelection;
+import com.ferralith.alkemia.entity.PedestalBlockEntity;
 import com.ferralith.alkemia.mixin.InteractionAccessor;
 import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
 import com.ferralith.alkemia.ritual.*;
 import com.ferralith.alkemia.ritual.data.RitualRecipeData;
 import com.ferralith.alkemia.ritual.data.RitualRecipeManager;
+import com.ibm.icu.impl.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -24,8 +26,12 @@ import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2i;
 
@@ -33,9 +39,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.ferralith.alkemia.block.RitualBaseBlock.*;
 
@@ -109,23 +113,89 @@ public class RitualMasterBlockEntity extends BlockEntity {
 
         if (!isActive) {
 //            isActive = true;
-            RitualRecipeData recipe = RitualRecipeManager.findMatchingRecipe(this.graph);
+
+            List<BlockPos> nearbyPedestals = getItemsInNearbyPedestals(getLevel(), getBlockPos());
+            System.out.println("Non-empty pedestals" + nearbyPedestals.size());
+            RitualRecipeData recipe = RitualRecipeManager.findMatchingRecipe(this.graph, nearbyPedestals, getLevel(), getBlockPos());
             if (recipe == null) return;
             Minecraft.getInstance().player.sendSystemMessage(Component.literal(recipe.template));
 
             if (recipe.results.getFirst().type == RitualRecipeData.RecipeType.CRAFT) {
+                removeItemsFromPedestals(recipe, nearbyPedestals);
+
                 System.out.println(recipe.results.getFirst().data);
                 String item_str = recipe.results.getFirst().data.getAsString();
                 ResourceLocation item_loc = ResourceLocation.parse(item_str);
                 Item item = BuiltInRegistries.ITEM.get(item_loc);
-                Entity item_entity = new ItemEntity(level,
-                        this.worldPosition.getX(),
-                        this.worldPosition.getY()+2,
-                        this.worldPosition.getZ(),
-                        item.getDefaultInstance());
-                level.addFreshEntity(item_entity);
+                putItemInPedestal(new ItemStack(item), getBlockPos().above());
             }
         }
+    }
+
+    private void putItemInPedestal(ItemStack itemStack, BlockPos blockPos) {
+        BlockEntity blockEntity = getLevel().getBlockEntity(blockPos);
+        if (blockEntity instanceof PedestalBlockEntity pedestal) {
+            pedestal.clearInventory();
+            pedestal.inventory.insertItem(0, itemStack, false);
+        }
+    }
+
+    private void removeItemsFromPedestals(RitualRecipeData recipe, List<BlockPos> nearbyPedestals) {
+        List<ResourceLocation> neededItems = new ArrayList<>();
+        for (RitualRecipeData.JsonIngredient ingredient : recipe.item_inputs) {
+            if (ingredient.item != null) {
+                for(int i=0; i < ingredient.count; i++) {
+                    neededItems.add(ResourceLocation.parse(ingredient.item));
+                }
+            }
+        }
+
+        for (BlockPos pedestalPos : nearbyPedestals) {
+            BlockEntity blockEntity = getLevel().getBlockEntity(pedestalPos);
+            if (blockEntity instanceof PedestalBlockEntity pedestal) {
+                ItemStack stackInSlot = pedestal.inventory.getStackInSlot(0);
+
+                if (stackInSlot.isEmpty()) continue;
+
+                Iterator<ResourceLocation> iterator = neededItems.iterator();
+                while (iterator.hasNext()) {
+                    ResourceLocation neededLoc = iterator.next();
+
+                    if (stackInSlot.is(BuiltInRegistries.ITEM.get(neededLoc))) {
+                        iterator.remove();
+
+                        pedestal.inventory.extractItem(0, 1, false);
+
+                        pedestal.setChanged();
+
+                        BlockState pedestalState = getLevel().getBlockState(pedestalPos);
+                        getLevel().sendBlockUpdated(pedestalPos, pedestalState, pedestalState, 3);
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private List<BlockPos> getItemsInNearbyPedestals(Level level, BlockPos blockPos) {
+        List<BlockPos> posList = new ArrayList<>();
+
+        int radius1 = radius+1;
+        for (int x = - radius1; x < radius1; x++) {
+            for (int z = - radius1; z < radius1; z++) {
+                BlockPos pos = blockPos.offset(x, 1, z);
+                if (z == 0 && x == 0) continue;
+                BlockEntity blockEntity = level.getBlockEntity(pos);
+                if (blockEntity instanceof PedestalBlockEntity pedestalBlockEntity) {
+                    if (!pedestalBlockEntity.inventory.getStackInSlot(0).isEmpty()) {
+                        posList.add(pos);
+                    }
+                }
+            }
+        }
+
+        return posList;
     }
 
 

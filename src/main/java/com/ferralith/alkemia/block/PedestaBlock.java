@@ -81,11 +81,9 @@ public class PedestaBlock extends BaseEntityBlock {
                 return ItemInteractionResult.SUCCESS;
             } else if (!entity.inventory.getStackInSlot(0).isEmpty() && !stack.isEmpty()) {
                 ItemStack extractItem = entity.inventory.extractItem(0, 1, false);
-                player.addItem(extractItem);
-                stack.shrink(1);
-                entity.clearInventory();
                 entity.inventory.insertItem(0, stack.copy(), false);
-
+                stack.shrink(1);
+                player.addItem(extractItem);
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
                 return ItemInteractionResult.SUCCESS;
             } else if (!entity.inventory.getStackInSlot(0).isEmpty()) {

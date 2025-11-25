@@ -2,6 +2,7 @@ package com.ferralith.alkemia.client;
 
 import com.ferralith.alkemia.block.RitualBaseBlock;
 import com.ferralith.alkemia.entity.ritualblock.RitualMasterBlockEntity;
+import com.ferralith.alkemia.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
@@ -22,26 +23,27 @@ public class RitualDrawHandler {
         if (level.isClientSide()) {
             return;
         }
+        if (player.getMainHandItem().is(ModItems.CHALK_ITEM)) {
+            if (event.getTarget() instanceof Interaction interaction) {
 
-        if (event.getTarget() instanceof Interaction interaction) {
+                CompoundTag nbt = interaction.getPersistentData();
 
-            CompoundTag nbt = interaction.getPersistentData();
+                if (nbt.contains(RitualBaseBlock.RITUAL_MASTER_TAG)) {
 
-            if (nbt.contains(RitualBaseBlock.RITUAL_MASTER_TAG)) {
+                    UUID ritualID = nbt.getUUID(RitualBaseBlock.RITUAL_MASTER_TAG);
+                    int nodeIndex = nbt.getInt(RitualBaseBlock.RITUAL_NODE_INDEX_TAG);
 
-                UUID ritualID = nbt.getUUID(RitualBaseBlock.RITUAL_MASTER_TAG);
-                int nodeIndex = nbt.getInt(RitualBaseBlock.RITUAL_NODE_INDEX_TAG);
+                    long posLong = nbt.getLong(RitualBaseBlock.RITUAL_MATER_POS);
+                    BlockPos masterPos = BlockPos.of(posLong);
 
-                long posLong = nbt.getLong(RitualBaseBlock.RITUAL_MATER_POS);
-                BlockPos masterPos = BlockPos.of(posLong);
-
-                BlockEntity be = level.getBlockEntity(masterPos);
+                    BlockEntity be = level.getBlockEntity(masterPos);
 //                System.out.println(masterPos);
-                if (be instanceof RitualMasterBlockEntity master) {
+                    if (be instanceof RitualMasterBlockEntity master) {
 
-                    master.onNodeClicked(player, nodeIndex);
-                    event.setCancellationResult(InteractionResult.SUCCESS);
-                    event.setCanceled(true);
+                        master.onNodeClicked(player, nodeIndex);
+                        event.setCancellationResult(InteractionResult.SUCCESS);
+                        event.setCanceled(true);
+                    }
                 }
             }
         }

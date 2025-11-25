@@ -16,6 +16,8 @@ public class RitualRecipeData {
     public int mana_cost;
 
     @Nullable
+    public JsonIngredient main_item;
+    @Nullable
     public List<JsonIngredient> item_inputs;
 
     public List<JsonResult> results;
