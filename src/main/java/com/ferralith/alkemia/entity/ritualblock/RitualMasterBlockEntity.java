@@ -5,6 +5,7 @@ import com.ferralith.alkemia.entity.PedestalBlockEntity;
 import com.ferralith.alkemia.mixin.InteractionAccessor;
 import com.ferralith.alkemia.registries.ModAttachments;
 import com.ferralith.alkemia.registries.ModBlockEntities;
+import com.ferralith.alkemia.registries.ModSounds;
 import com.ferralith.alkemia.ritual.*;
 import com.ferralith.alkemia.ritual.data.RitualRecipeData;
 import com.ferralith.alkemia.ritual.data.RitualRecipeManager;
@@ -20,6 +21,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Interaction;
@@ -121,6 +123,7 @@ public class RitualMasterBlockEntity extends BlockEntity {
             Minecraft.getInstance().player.sendSystemMessage(Component.literal(recipe.template));
 
             if (recipe.results.getFirst().type == RitualRecipeData.RecipeType.CRAFT) {
+                level.playSound(null, getBlockPos(), ModSounds.RITUAL_ACTIVATED.get(), SoundSource.BLOCKS);
                 removeItemsFromPedestals(recipe, nearbyPedestals);
 
                 System.out.println(recipe.results.getFirst().data);
