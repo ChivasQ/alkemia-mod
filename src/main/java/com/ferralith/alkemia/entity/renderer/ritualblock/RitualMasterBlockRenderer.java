@@ -25,6 +25,8 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
     private static final float GLOW_HEIGHT_SCALE = 0.02f;
     private static final Vector4f GLOW_COLOR = new Vector4f(0.8f, 0.2f, 1.0f, 0.7f);
     private static final ResourceLocation ACTIVE = ResourceLocation.fromNamespaceAndPath(Alkemia.MODID, "textures/ritual/active.png");
+    private static final ResourceLocation CHALK = ResourceLocation.fromNamespaceAndPath(Alkemia.MODID, "textures/ritual/chalk_texture.png");
+    private static final RenderType CHALK_RENDER_TYPE = RenderType.entityCutoutNoCull(CHALK);
     private static final RenderType BEAM_RENDER_TYPE = RenderType.entityTranslucentEmissive(ACTIVE, true);
 
 
@@ -61,17 +63,17 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
 
         RitualFigures graph = be.getGraph();
 
-        VertexConsumer lineConsumer = buffer.getBuffer(RenderType.lines());
+        VertexConsumer lineConsumer = buffer.getBuffer(RenderType.debugQuads());
+        float lineWidth = 0.1f;
+
         for (var conn : graph.getJoints()) {
             Vec3 p1 = graph.getNode(conn.x);
             Vec3 p2 = graph.getNode(conn.y);
 
-            lineConsumer.addVertex(matrix, (float)p1.x, (float)p1.y, (float)p1.z)
-                    .setColor(1f, 1f, 1f, 1f)
-                    .setNormal(0, 1, 0);
-            lineConsumer.addVertex(matrix, (float)p2.x, (float)p2.y, (float)p2.z)
-                    .setColor(1f, 1f, 1f, 1f)
-                    .setNormal(0, 1, 0);
+            drawFlatThickLine(lineConsumer, matrix,
+                    (float)p1.x, (float)p1.y, (float)p1.z,
+                    (float)p2.x, (float)p2.y, (float)p2.z,
+                    lineWidth);
         }
         poseStack.popPose();
 
@@ -124,6 +126,61 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
 
     }
 
+    private void drawFlatThickLine(VertexConsumer consumer, Matrix4f matrix,
+                                   float x1, float y1, float z1,
+                                   float x2, float y2, float z2,
+                                   float width) {
+
+        float dx = x2 - x1;
+        float dz = z2 - z1;
+        float length = (float) ((float) Math.sqrt(dx * dx + dz * dz));
+
+        float halfThickness = (float) (0.25 / 2.0);
+        float px = -dz / length * (halfThickness / 2f);
+        float pz = dx / length * (halfThickness / 2f);
+
+        length = length*3.2f;
+        float y = y1 + 0.001f;
+
+        float v1x = x1 + px;
+        float v1z = z1 + pz;
+
+        float v2x = x1 - px;
+        float v2z = z1 - pz;
+
+        float v3x = x2 - px;
+        float v3z = z2 - pz;
+
+        float v4x = x2 + px;
+        float v4z = z2 + pz;
+        consumer.addVertex(matrix, v1x, y, v1z)
+                .setColor(1f, 1f, 1f, 1f)
+                .setUv(0, 0) // U=0, V=0
+                .setLight(0xF000F0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setNormal(0, 1, 0);
+
+        consumer.addVertex(matrix, v2x, y, v2z)
+                .setColor(1f, 1f, 1f, 1f)
+                .setUv(0, 1) // U=0, V=1
+                .setLight(0xF000F0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setNormal(0, 1, 0);
+
+        consumer.addVertex(matrix, v3x, y, v3z)
+                .setColor(1f, 1f, 1f, 1f)
+                .setUv(length, 1) // U=Length, V=1
+                .setLight(0xF000F0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setNormal(0, 1, 0);
+
+        consumer.addVertex(matrix, v4x, y, v4z)
+                .setColor(1f, 1f, 1f, 1f)
+                .setUv(length, 0) // U=Length, V=0
+                .setLight(0xF000F0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setNormal(0, 1, 0);
+    }
 
     private Vec3 getNodeWorldPos(int nodeIndex, float radius) {
         double angle = Math.toRadians(360.0 / 12 * nodeIndex - 90);
