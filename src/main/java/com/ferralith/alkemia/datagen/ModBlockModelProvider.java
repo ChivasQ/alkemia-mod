@@ -13,5 +13,6 @@ public class ModBlockModelProvider extends BlockModelProvider {
     @Override
     protected void registerModels() {
 //        withExistingParent("mana_block", modLoc("block/mana"));
+
     }
 }

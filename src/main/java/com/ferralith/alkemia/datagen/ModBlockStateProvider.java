@@ -4,6 +4,7 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.registries.ModBlocks;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -26,7 +27,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 ModBlocks.MANA_BLOCK.get(),
                 models().getExistingFile(mcLoc("lava"))
         );
-
+        blockWithItem(ModBlocks.PORPHYRY_STONE);
+        blockWithItem(ModBlocks.PORPHYRY_BRICKS);
+        blockWithItem(ModBlocks.SMOOTH_PORPHYRY);
     }
 
     private void blockWithItem(DeferredBlock<Block> exampleBlock) {

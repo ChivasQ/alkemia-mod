@@ -23,6 +23,10 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.CHALKBOARD_BLOCK.get());
         dropSelf(ModBlocks.RITUAL_BLOCK.get());
         dropSelf(ModBlocks.PEDESTAL.get());
+
+        dropSelf(ModBlocks.PORPHYRY_STONE.get());
+        dropSelf(ModBlocks.PORPHYRY_BRICKS.get());
+        dropSelf(ModBlocks.SMOOTH_PORPHYRY.get());
         //see BlockLootSubProvider.java for more examples of drops
     }
 

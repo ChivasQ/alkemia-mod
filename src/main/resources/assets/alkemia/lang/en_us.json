@@ -4,6 +4,11 @@
   "item.alkemia.example_item": "Example Item",
   "item.alkemia.jar_item": "Jar",
 
+  "block.alkemia.porphyry_bricks": "Porphyry bricks",
+  "block.alkemia.porphyry_stone": "Porphyry stone",
+  "block.alkemia.smooth_porphyry": "smooth porphyry",
+  "block.alkemia.pedestal": "Porphyry pedestal",
+
   "tooltip.alkemia.empty": "Empty",
 
 
