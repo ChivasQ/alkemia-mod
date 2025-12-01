@@ -4,21 +4,33 @@ import com.ferralith.alkemia.Alkemia;
 import com.ferralith.alkemia.entity.ritualblock.RitualMasterBlockEntity;
 import com.ferralith.alkemia.particle.ManaParticle;
 import com.ferralith.alkemia.registries.ModParticles;
+import com.ferralith.alkemia.registries.ModRenderTypes;
 import com.ferralith.alkemia.ritual.RitualFigures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
+
+import java.awt.*;
+import java.util.List;
 
 public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMasterBlockEntity> {
     private static final float GLOW_WIDTH = 0.05f;
@@ -76,33 +88,79 @@ public class RitualMasterBlockRenderer implements BlockEntityRenderer<RitualMast
                     lineWidth);
         }
         poseStack.popPose();
+        poseStack.pushPose();
+        poseStack.translate(0.5, 0, 0.5);
+        List<BlockPos> lockedPedestals = be.getLockedPedestals();
+        int index = be.getCurrentPedestalIndex();
+        float time = (float) Math.min(20, be.getConsumeTimer()) / 20;
+        VertexConsumer debuglineConsumer = buffer.getBuffer(RenderType.lines());
+        Matrix4f debugMatrix = poseStack.last().pose();
+        if (lockedPedestals != null && !lockedPedestals.isEmpty() && lockedPedestals.size() > index) {
+            BlockPos pos = lockedPedestals.get(index);
+            float dx = pos.getX() - be.getBlockPos().getX();
+            float dy = pos.getY() - be.getBlockPos().getY();
+            float dz = pos.getZ() - be.getBlockPos().getZ();
 
-        if (be.getProgress() > 0) {
-            VertexConsumer glowConsumer = buffer.getBuffer(BEAM_RENDER_TYPE);
-
-            float currentProgress = be.getProgress() + partialTick;
-            float glowHeight = currentProgress * GLOW_HEIGHT_SCALE;
-
-            glowHeight = Math.min(glowHeight, 100 * GLOW_HEIGHT_SCALE);
-            float alpha = 0.7f * (currentProgress/100);
-            for (var conn : graph.getJoints()) {
-                Vec3 p1 = graph.getNode(conn.x);
-                Vec3 p2 = graph.getNode(conn.y);
-                p1.distanceTo(p2);
-                poseStack.pushPose();
-                poseStack.translate(0.5, 1.01, 0.5);
-
-                drawQuad(glowConsumer, poseStack,
-                        (float) p1.x, (float) p1.y, (float) p1.z,
-                        (float) p2.x, (float) p2.y+glowHeight, (float) p2.z,
-                        (float) 0, 1-currentProgress/100,
-                        (float) p1.distanceTo(p2)/2.56f,1f,
-                        0xF000F0,
-                        OverlayTexture.NO_OVERLAY,
-                        alpha);
-                poseStack.popPose();
-            }
+            debuglineConsumer.addVertex(debugMatrix, dx - dx * time, (dy - dy * time) + 2.5f, dz - dz * time)
+                    .setColor(1f, 1f, 1f, 1f)
+                    .setNormal(0, 1, 0);
+            debuglineConsumer.addVertex(debugMatrix, dx, dy+1.5f, dz)
+                    .setColor(1f, 1f, 1f, 1f)
+                    .setNormal(0, 1, 0);
         }
+        poseStack.popPose();
+
+        Font font = Minecraft.getInstance().gui.getFont();
+        poseStack.pushPose();
+        poseStack.translate(0.5, 4, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(- Minecraft.getInstance().player.yHeadRot + 180));
+        poseStack.scale(0.05f,-0.05f,0.05f);
+        renderText(font, be.getState().name(), 0, 0, 0.05f, poseStack, buffer, packedLight);
+        poseStack.popPose();
+
+//        if (be.getProgress() > 0 && false) {
+//            VertexConsumer glowConsumer = buffer.getBuffer(ModRenderTypes.brightSolid(CHALK));
+//
+//            float currentProgress = be.getProgress() + partialTick;
+//            float glowHeight = currentProgress * GLOW_HEIGHT_SCALE;
+//
+//            glowHeight = Math.min(glowHeight, 100 * GLOW_HEIGHT_SCALE);
+//            float alpha = 0.7f * (currentProgress/100);
+//            for (var conn : graph.getJoints()) {
+//                Vec3 p1 = graph.getNode(conn.x);
+//                Vec3 p2 = graph.getNode(conn.y);
+//                double v = p1.distanceTo(p2);
+//                poseStack.pushPose();
+//                poseStack.translate(0.5, 1.01, 0.5);
+//
+//                drawQuad(glowConsumer, poseStack,
+//                        (float) p1.x, (float) p1.y, (float) p1.z,
+//                        (float) p2.x, (float) p2.y+glowHeight, (float) p2.z,
+//                        (float) 0, 1-currentProgress/100,
+//                        (float) v /2.56f,1f,
+//                        0xF000F0,
+//                        OverlayTexture.NO_OVERLAY,
+//                        alpha);
+//                poseStack.popPose();
+//            }
+//        }
+    }
+
+    private static void renderText(Font font, String string, int x, int y, float size, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
+        font.drawInBatch8xOutline(
+                FormattedCharSequence.forward(string, Style.EMPTY),
+                (float) - ((string.length() /2)+1)*5,
+                0,
+                RGBAtoINT(0, 0, 0, 255),
+                RGBAtoINT(255, 255, 255, 255),
+                pPoseStack.last().pose(),
+                pBuffer,
+                255
+        );
+    }
+
+    public static int RGBAtoINT(int r, int g, int b, int a) {
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     private void drawVertex(VertexConsumer buffer, PoseStack poseStack,

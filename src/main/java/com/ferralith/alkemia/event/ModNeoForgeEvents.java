@@ -53,6 +53,7 @@ public class ModNeoForgeEvents {
                     try {
                         RitualRecipeData data = GSON.fromJson(json, RitualRecipeData.class);
                         System.out.println("scraping recipe: " + id);
+                        data.id = id.toString();
                         RitualRecipeManager.registerRecipe(id, data);
                     } catch (Exception e) {
                         e.printStackTrace();

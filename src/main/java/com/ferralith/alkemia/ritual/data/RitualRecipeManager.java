@@ -153,4 +153,21 @@ public class RitualRecipeManager {
 
         return true;
     }
+
+    public static List<BlockPos> filterPedestals(List<BlockPos> nearbyPedestals, RitualRecipeData recipe, Level level, BlockPos blockPos) {
+        List<BlockPos> output = new ArrayList<>();
+        if (recipe == null) return new ArrayList<>();
+        for (RitualRecipeData.JsonIngredient item : recipe.item_inputs) {
+            Iterator<BlockPos> iterator = nearbyPedestals.iterator();
+            while (iterator.hasNext()) {
+                BlockPos nextPos = iterator.next();
+
+                if (matches(getItemInPedestal(level, nextPos), item)) {
+                    iterator.remove();
+                    output.add(nextPos);
+                }
+            }
+        }
+        return output;
+    }
 }

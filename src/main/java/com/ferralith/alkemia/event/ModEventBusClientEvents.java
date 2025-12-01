@@ -11,8 +11,11 @@ import com.ferralith.alkemia.entity.renderer.ritualblock.RitualMasterBlockRender
 import com.ferralith.alkemia.item.curios.CloakModel;
 import com.ferralith.alkemia.particle.ManaParticle;
 import com.ferralith.alkemia.registries.*;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.Event;
@@ -23,6 +26,8 @@ import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
+
+import java.io.IOException;
 
 @EventBusSubscriber(modid = Alkemia.MODID, value = Dist.CLIENT)
 public class ModEventBusClientEvents {

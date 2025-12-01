@@ -15,12 +15,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -31,6 +34,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -49,16 +53,32 @@ import static com.ferralith.alkemia.block.RitualBaseBlock.*;
 public class RitualMasterBlockEntity extends BlockEntity {
     private final RitualFigures graph;
     private int radius = 5;
-    private boolean isActive = false;
-    private int progress;
-    private int cooktime = 0;
+
+    public enum RitualState {
+        IDLE,           // Ожидание
+        STARTING,       // Подготовка (визуал)
+        CONSUMING,      // Поедание предметов по одному
+        CRAFTING,       // Финальная обработка
+        FINISHED        // Спавн результата
+    }
+
+    private RitualState state = RitualState.IDLE;
+
+    private int stateTimer = 0;
+    private int currentPedestalIndex = 0;
+    private int consumeTimer = 0;
+
+    private static final int CONSUME_DELAY = 60;
+
+    private List<BlockPos> lockedPedestals = new ArrayList<>();
+    private RitualRecipeData currentRecipe;
+
     @Nullable
     private UUID ritualID;
 
     public RitualMasterBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.MASTER_RITUAL_ENTITY.get(), pos, blockState);
         this.graph = new RitualFigures(pos.getBottomCenter().add(0,1,0), radius);
-        this.progress = 0;
     }
 
     public void setRitualID(UUID ritualID) {
@@ -71,67 +91,110 @@ public class RitualMasterBlockEntity extends BlockEntity {
         return this.ritualID;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
 
-    public int getProgress() {
-        return progress;
-    }
-
-    public int getCooktime() {
-        return cooktime;
+    public List<BlockPos> getLockedPedestals() {
+        return lockedPedestals;
     }
 
     public void tick() {
-        if (this.getLevel() == null) return;
+        if (level == null || level.isClientSide()) return;
 
-        if (!level.isClientSide()) {
-            if (isActive) {
-                progress++;
-                if (progress > 100) {
-                    cooktime++;
-                    progress--;
-                    if (cooktime > 200) {
-                        isActive = false;
-                        cooktime = 0;
-                    }
+        if (state == RitualState.IDLE) return;
+
+        stateTimer++;
+        System.out.println(state);
+        switch (state) {
+            case STARTING:
+                if (stateTimer >= 20) {
+                    state = RitualState.CONSUMING;
+                    stateTimer = 0;
+                    currentPedestalIndex = 0;
+                    consumeTimer = 0;
+                    sync();
                 }
+                break;
 
-                setChanged();
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3); //FIXME: BAD SOLUTION
-            } else {
-                progress = Math.max(0, progress-5);
-                setChanged();
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            }
+            case CONSUMING:
+                consumeTimer++;
+
+                if (consumeTimer >= CONSUME_DELAY) {
+                    consumeTimer = 0;
+                    processNextPedestal();
+                }
+                sync();
+                break;
+
+            case CRAFTING:
+                if (stateTimer >= 40) {
+                    finishRitual();
+                }
+                break;
+
+            case FINISHED:
+                resetRitual();
+                break;
         }
-
-
     }
 
-    public void checkForRitual() {
-        if (level.isClientSide()) return;
+    public int getConsumeTimer() {
+        return consumeTimer;
+    }
 
-        if (!isActive) {
-//            isActive = true;
+    public int getCurrentPedestalIndex() {
+        return currentPedestalIndex;
+    }
 
-            List<BlockPos> nearbyPedestals = getItemsInNearbyPedestals(getLevel(), getBlockPos());
-            System.out.println("Non-empty pedestals" + nearbyPedestals.size());
-            RitualRecipeData recipe = RitualRecipeManager.findMatchingRecipe(this.graph, nearbyPedestals, getLevel(), getBlockPos());
-            if (recipe == null) return;
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal(recipe.template));
+    private void processNextPedestal() {
+        if (currentPedestalIndex >= lockedPedestals.size()) {
+            state = RitualState.CRAFTING;
+            stateTimer = 0;
+            sync();
+            return;
+        }
 
-            if (recipe.results.getFirst().type == RitualRecipeData.RecipeType.CRAFT) {
-                level.playSound(null, getBlockPos(), ModSounds.RITUAL_ACTIVATED.get(), SoundSource.BLOCKS);
-                removeItemsFromPedestals(recipe, nearbyPedestals);
+        BlockPos pedestalPos = lockedPedestals.get(currentPedestalIndex);
+        BlockEntity be = level.getBlockEntity(pedestalPos);
 
-                System.out.println(recipe.results.getFirst().data);
-                String item_str = recipe.results.getFirst().data.getAsString();
-                ResourceLocation item_loc = ResourceLocation.parse(item_str);
-                Item item = BuiltInRegistries.ITEM.get(item_loc);
-                putItemInPedestal(new ItemStack(item), getBlockPos().above());
+        if (be instanceof PedestalBlockEntity pedestal) {
+            if (!pedestal.inventory.extractItem(0, 1, false).isEmpty()) {
+
+                level.playSound(null, pedestalPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 1f);
+
+                level.sendBlockUpdated(pedestalPos, pedestal.getBlockState(), pedestal.getBlockState(), 3);
+
+                currentPedestalIndex++;
+
+                sync();
+
+            } else {
+                abortRitual("Missing item at index " + currentPedestalIndex);
             }
+        } else {
+            abortRitual("Invalid pedestal block entity");
+        }
+    }
+
+
+    public void checkForRitual() {
+        if (level.isClientSide() || state != RitualState.IDLE) return;
+
+        List<BlockPos> nearbyPedestals = getItemsInNearbyPedestals(getLevel(), getBlockPos());
+        RitualRecipeData recipe = RitualRecipeManager.findMatchingRecipe(this.graph, nearbyPedestals, getLevel(), getBlockPos());
+
+        List<BlockPos> filtered = RitualRecipeManager.filterPedestals(nearbyPedestals, recipe, getLevel(), getBlockPos());
+
+        if (recipe != null && filtered != null) {
+            this.state = RitualState.STARTING;
+            this.stateTimer = 0;
+            this.currentRecipe = recipe;
+
+            this.lockedPedestals.clear();
+            this.lockedPedestals.addAll(filtered);
+
+            System.out.println("Ritual Started. Pedestals: " + lockedPedestals.size());
+
+            level.playSound(null, getBlockPos(), ModSounds.RITUAL_ACTIVATED.get(), SoundSource.BLOCKS);
+            sync();
         }
     }
 
@@ -140,15 +203,16 @@ public class RitualMasterBlockEntity extends BlockEntity {
         if (blockEntity instanceof PedestalBlockEntity pedestal) {
             pedestal.clearInventory();
             pedestal.inventory.insertItem(0, itemStack, false);
+            level.sendBlockUpdated(blockPos, pedestal.getBlockState(), pedestal.getBlockState(), 3);
         }
     }
 
     private void removeItemsFromPedestals(RitualRecipeData recipe, List<BlockPos> nearbyPedestals) {
-        List<ResourceLocation> neededItems = new ArrayList<>();
+        List<Item> neededItems = new ArrayList<>();
         for (RitualRecipeData.JsonIngredient ingredient : recipe.item_inputs) {
             if (ingredient.item != null) {
                 for(int i=0; i < ingredient.count; i++) {
-                    neededItems.add(ResourceLocation.parse(ingredient.item));
+                    neededItems.add(BuiltInRegistries.ITEM.get(ResourceLocation.parse(ingredient.item)));
                 }
             }
         }
@@ -160,19 +224,14 @@ public class RitualMasterBlockEntity extends BlockEntity {
 
                 if (stackInSlot.isEmpty()) continue;
 
-                Iterator<ResourceLocation> iterator = neededItems.iterator();
+                Iterator<Item> iterator = neededItems.iterator();
                 while (iterator.hasNext()) {
-                    ResourceLocation neededLoc = iterator.next();
+                    Item item = iterator.next();
 
-                    if (stackInSlot.is(BuiltInRegistries.ITEM.get(neededLoc))) {
+                    if (stackInSlot.is(item)) {
                         iterator.remove();
 
-                        pedestal.inventory.extractItem(0, 1, false);
-
-                        pedestal.setChanged();
-
-                        BlockState pedestalState = getLevel().getBlockState(pedestalPos);
-                        getLevel().sendBlockUpdated(pedestalPos, pedestalState, pedestalState, 3);
+                        pedestal.extractItem(0,1);
 
                         break;
                     }
@@ -198,9 +257,49 @@ public class RitualMasterBlockEntity extends BlockEntity {
             }
         }
 
+        Collections.sort(posList, ((o1, o2) -> {
+            int dist_o1 = blockPos.distManhattan(o1);
+            int dist_o2 = blockPos.distManhattan(o2);
+            return dist_o1 - dist_o2;
+        }));
         return posList;
     }
 
+    private void finishRitual() {
+        if (currentRecipe != null && currentRecipe.results != null && !currentRecipe.results.isEmpty()) {
+            if (currentRecipe.results.getFirst().type == RitualRecipeData.RecipeType.CRAFT) {
+                String item_str = currentRecipe.results.getFirst().data.getAsString();
+                ResourceLocation item_loc = ResourceLocation.parse(item_str);
+                Item item = BuiltInRegistries.ITEM.get(item_loc);
+
+                putItemInPedestal(new ItemStack(item), getBlockPos().above());
+                level.playSound(null, getBlockPos(), ModSounds.RITUAL_ACTIVATED.get(), SoundSource.BLOCKS, 1f, 1f);
+            }
+        }
+
+        state = RitualState.FINISHED;
+    }
+
+    private void abortRitual(String reason) {
+        System.out.println("Ritual Aborted: " + reason);
+        level.playSound(null, getBlockPos(), SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 1f, 1f);
+        resetRitual();
+    }
+
+    private void resetRitual() {
+        state = RitualState.IDLE;
+        stateTimer = 0;
+        currentPedestalIndex = 0;
+        lockedPedestals.clear();
+        consumeTimer = 0;
+        currentRecipe = null;
+        sync();
+    }
+
+    private void sync() {
+        setChanged();
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
 
     public void onNodeClicked(Player player, int nodeIndex) {
         player.sendSystemMessage(Component.literal("node #" + nodeIndex));
@@ -260,56 +359,63 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.saveAdditional(nbt, registries);
-        nbt.putInt("cooktime", this.cooktime);
-        nbt.putInt("progress", this.progress);
-        nbt.putBoolean("active", this.isActive);
-
-        if (this.ritualID != null) {
-            nbt.putUUID("ritual_id", this.ritualID);
-        }
-        CompoundTag tag = graph.serializeNBT(registries);
-        nbt.put("graph_data", tag);
-        saveNbtToFile(tag, "data.json");
+        saveRitualData(nbt, registries);
     }
 
-    public static void saveNbtToFile(CompoundTag nbtData, String fileName) {
-        File outputFile = new File(fileName);
-        String snbtString = nbtData.toString();
-        try (FileWriter writer = new FileWriter(outputFile)){
+    private void saveRitualData(CompoundTag nbt, HolderLookup.Provider registries) {
+        nbt.putString("state", state.name());
+        nbt.putInt("state_timer", stateTimer);
+        nbt.putInt("consume_timer", consumeTimer);
+        nbt.putInt("pedestal_index", currentPedestalIndex);
 
-            writer.write(snbtString);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (this.ritualID != null) nbt.putUUID("ritual_id", this.ritualID);
+        nbt.put("graph_data", graph.serializeNBT(registries));
+
+        long[] pedestalsArray = lockedPedestals.stream().mapToLong(BlockPos::asLong).toArray();
+        nbt.putLongArray("locked_pedestals", pedestalsArray);
+
+        if (this.currentRecipe != null) {
+            nbt.putString("recipe_name", this.currentRecipe.id);
+        }
+    }
+
+    private void loadRitualData(CompoundTag nbt, HolderLookup.Provider registries) {
+        if (nbt.contains("state")) {
+            try {
+                this.state = RitualState.valueOf(nbt.getString("state"));
+            } catch (IllegalArgumentException e) {
+                this.state = RitualState.IDLE;
+            }
+        }
+
+        if (nbt.contains("state_timer")) this.stateTimer = nbt.getInt("state_timer");
+        if (nbt.contains("consume_timer")) this.consumeTimer = nbt.getInt("consume_timer");
+        if (nbt.contains("pedestal_index")) this.currentPedestalIndex = nbt.getInt("pedestal_index");
+        if (nbt.contains("recipe_name")) this.currentRecipe = RitualRecipeManager.getRecipe(ResourceLocation.parse(nbt.getString("recipe_name")));
+
+        if (nbt.hasUUID("ritual_id")) this.ritualID = nbt.getUUID("ritual_id");
+        if (nbt.contains("graph_data", Tag.TAG_COMPOUND)) graph.deserializeNBT(registries, nbt.getCompound("graph_data"));
+
+        if (nbt.contains("locked_pedestals")) {
+            this.lockedPedestals.clear();
+            long[] pedestalsArray = nbt.getLongArray("locked_pedestals");
+            for (long p : pedestalsArray) {
+                this.lockedPedestals.add(BlockPos.of(p));
+            }
         }
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag nbt = super.getUpdateTag(registries);
-        nbt.putInt("cooktime", this.cooktime);
-        nbt.putInt("progress", this.progress);
-        nbt.putBoolean("active", this.isActive);
-        nbt.put("graph_data", graph.serializeNBT(registries));
+        saveRitualData(nbt, registries);
         return nbt;
     }
 
     @Override
     public void handleUpdateTag(CompoundTag nbt, HolderLookup.Provider registries) {
-
         super.handleUpdateTag(nbt, registries);
-        if (nbt.contains("cooktime")) {
-            this.cooktime = nbt.getInt("cooktime");
-        }
-
-        if (nbt.contains("progress")) {
-            this.progress = nbt.getInt("progress");
-        }
-        if (nbt.contains("active")) {
-            this.isActive = nbt.getBoolean("active");
-        }
-        if (nbt.contains("graph_data", Tag.TAG_COMPOUND)) {
-            graph.deserializeNBT(registries, nbt.getCompound("graph_data"));
-        }
+        loadRitualData(nbt, registries);
     }
 
     @Nullable
@@ -321,24 +427,10 @@ public class RitualMasterBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.loadAdditional(nbt, registries);
-        cooktime = nbt.getInt("cooktime");
-        progress = nbt.getInt("progress");
-        isActive = nbt.getBoolean("active");
-
-        if (nbt.hasUUID("ritual_id")) {
-            this.ritualID = nbt.getUUID("ritual_id");
-        }
-        if (nbt.contains("graph_data", Tag.TAG_COMPOUND)) {
-            graph.deserializeNBT(registries, nbt.getCompound("graph_data"));
-        }
-
+        loadRitualData(nbt, registries);
     }
 
-    public RitualFigures getGraph() {
-        return graph;
-    }
-
-    public int getRadius() {
-        return radius;
-    }
+    public RitualState getState() { return state; }
+    public RitualFigures getGraph() { return graph; }
+    public int getRadius() { return radius; }
 }

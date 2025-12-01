@@ -9,6 +9,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class RitualRecipeData {
+    @Nullable
+    public String id;
     public String template;
     public int color;
     public int tier;

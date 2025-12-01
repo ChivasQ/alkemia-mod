@@ -1,7 +1,6 @@
 package com.ferralith.alkemia.entity;
 
 import com.ferralith.alkemia.registries.ModBlockEntities;
-import com.ferralith.alkemia.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -13,14 +12,14 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PedestalBlockEntity extends BlockEntity {
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
@@ -54,6 +53,14 @@ public class PedestalBlockEntity extends BlockEntity {
         }
 
         Containers.dropContents(level, worldPosition.offset(0,1,0), inv);
+    }
+
+    public ItemStack extractItem(int slot, int amount) {
+        ItemStack stack = this.inventory.extractItem(slot, amount, false);
+
+        this.setChanged();
+        getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        return stack;
     }
 
     @Override
